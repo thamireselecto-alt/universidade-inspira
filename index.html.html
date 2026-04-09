@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Universidade Inspira</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"><\/script>
+<style>
+:root{--navy:#0B1628;--navy-mid:#162240;--gold:#C9A84C;--gold-light:#E8C97A;--gold-pale:#F5E6C0;--cream:#FAF7F2;--text:#0B1628;--text-mid:#3D4F6E;--text-light:#7A8BA8;--border:rgba(11,22,40,0.1);--green:#2A7D5F;--red:#C0392B;--orange:#D4853A}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--text);min-height:100vh}
+.screen{display:none;min-height:100vh}.screen.active{display:flex;flex-direction:column}
+#screen-login{background:var(--navy);align-items:center;justify-content:center;position:relative;overflow:hidden}
+#screen-login::before{content:"";position:absolute;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(201,168,76,0.12) 0%,transparent 70%);top:-100px;right:-100px}
+.login-box{background:rgba(255,255,255,0.04);border:1px solid rgba(201,168,76,0.2);border-radius:20px;padding:48px;width:420px;position:relative;z-index:2}
+.wordmark{font-family:"Syne",sans-serif;font-size:13px;font-weight:600;letter-spacing:4px;color:var(--gold);text-transform:uppercase;text-align:center;margin-bottom:4px}
+.login-sub-text{font-size:12px;color:rgba(255,255,255,0.4);text-align:center;margin-bottom:28px;letter-spacing:1px}
+.login-options{display:flex;gap:10px;margin-bottom:24px}
+.login-opt{flex:1;padding:14px;border-radius:10px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.03);cursor:pointer;text-align:center;transition:all .2s}
+.login-opt.selected{border-color:var(--gold);background:rgba(201,168,76,0.08)}
+.opt-icon{font-size:20px;margin-bottom:6px}
+.opt-label{font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,0.5)}
+.login-opt.selected .opt-label{color:var(--gold)}
+.login-field{margin-bottom:14px}
+.login-field label{font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.5);display:block;margin-bottom:8px}
+.login-field input{width:100%;padding:13px 16px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:10px;color:#fff;font-size:14px;font-family:inherit}
+.login-field input:focus{outline:none;border-color:var(--gold)}
+.login-field input::placeholder{color:rgba(255,255,255,0.2)}
+.btn-primary{width:100%;padding:14px;background:var(--gold);border:none;border-radius:10px;font-family:"Syne",sans-serif;font-size:14px;font-weight:700;color:var(--navy);cursor:pointer;margin-top:6px;transition:all .2s}
+.btn-primary:hover{background:var(--gold-light);transform:translateY(-1px)}
+.btn-primary:disabled{opacity:.6;cursor:not-allowed;transform:none}
+.login-error{color:#ff6b6b;font-size:12px;text-align:center;margin-top:10px;display:none}
+.survey-header{background:var(--navy);padding:18px 32px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.brand{font-family:"Syne",sans-serif;font-size:12px;font-weight:700;letter-spacing:3px;color:var(--gold);text-transform:uppercase}
+.progress-wrap{flex:1;max-width:280px;margin:0 32px}
+.progress-label{font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:5px;display:flex;justify-content:space-between}
+.progress-bar{height:3px;background:rgba(255,255,255,0.1);border-radius:2px;overflow:hidden}
+.progress-fill{height:100%;background:var(--gold);border-radius:2px;transition:width .4s ease}
+.survey-body{flex:1;padding:48px 32px;max-width:720px;margin:0 auto;width:100%}
+.block-tag{display:inline-flex;background:var(--gold-pale);color:var(--navy);border-radius:20px;padding:4px 14px;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px}
+.block-title{font-family:"Syne",sans-serif;font-size:24px;font-weight:800;color:var(--navy);margin-bottom:6px;line-height:1.2}
+.block-desc{font-size:14px;color:var(--text-mid);margin-bottom:32px;line-height:1.6}
+.field{margin-bottom:24px}
+.field-label{font-size:13px;font-weight:600;color:var(--navy);margin-bottom:9px;display:block;line-height:1.4}
+.field-label span{font-weight:400;color:var(--text-mid)}
+.field input,.field select,.field textarea{width:100%;padding:12px 15px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;color:var(--text);background:#fff;transition:border-color .2s;font-family:inherit;appearance:none}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,168,76,.1)}
+.field textarea{resize:vertical;min-height:90px}
+.field select{background-image:url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'12\' height=\'12\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%237A8BA8\' stroke-width=\'2\'%3E%3Cpath d=\'m6 9 6 6 6-6\'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 13px center;padding-right:36px}
+.options-grid{display:grid;gap:9px}.options-grid.col2{grid-template-columns:1fr 1fr}
+.option-item{display:flex;align-items:center;gap:11px;padding:12px 15px;border:1.5px solid var(--border);border-radius:10px;cursor:pointer;background:#fff;transition:all .15s;font-size:14px;color:var(--text-mid)}
+.option-item:hover,.option-item.selected{border-color:var(--gold);background:var(--gold-pale)}
+.option-item.selected{color:var(--navy);font-weight:500}
+.option-dot{width:18px;height:18px;border-radius:50%;border:2px solid #ccc;flex-shrink:0;transition:all .15s;display:flex;align-items:center;justify-content:center}
+.option-item.selected .option-dot{border-color:var(--gold);background:var(--gold)}
+.option-dot::after{content:"";width:6px;height:6px;border-radius:50%;background:#fff;display:none}
+.option-item.selected .option-dot::after{display:block}
+.check-dot{border-radius:4px}
+.option-item.selected .check-dot::after{content:"✓";font-size:10px;display:flex;align-items:center;justify-content:center}
+.likert-table{width:100%;border-collapse:separate;border-spacing:0 7px}
+.likert-table th{font-size:10px;font-weight:600;color:var(--text-light);letter-spacing:1px;text-transform:uppercase;padding:0 6px 4px;text-align:center}
+.likert-table th:first-child{text-align:left}
+.likert-table td{padding:11px 6px;background:#fff;font-size:13px}
+.likert-table td:first-child{padding-left:14px;border-radius:10px 0 0 10px;font-weight:500}
+.likert-table td:last-child{border-radius:0 10px 10px 0}
+.likert-table tr:hover td{background:var(--gold-pale)}
+.likert-radio{width:20px;height:20px;border-radius:50%;border:2px solid #ccc;cursor:pointer;margin:0 auto;display:block;transition:all .15s}
+.likert-radio.checked{background:var(--gold);border-color:var(--gold)}
+.scale-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--text-light);margin-top:6px}
+.survey-nav{display:flex;justify-content:space-between;align-items:center;margin-top:36px;padding-top:22px;border-top:1px solid var(--border)}
+.btn-nav{padding:12px 26px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;border:none;font-family:inherit}
+.btn-back{background:transparent;color:var(--text-mid);border:1.5px solid var(--border)}
+.btn-back:hover{border-color:var(--navy);color:var(--navy)}
+.btn-next{background:var(--navy);color:#fff}
+.btn-next:hover{background:var(--navy-mid);transform:translateY(-1px)}
+.btn-submit{background:var(--gold);color:var(--navy);font-family:"Syne",sans-serif;font-weight:700}
+.btn-submit:hover{background:var(--gold-light);transform:translateY(-1px)}
+.step-counter{font-size:12px;color:var(--text-light)}
+.bigfive-intro{background:var(--navy);color:#fff;padding:36px 32px;text-align:center}
+.bigfive-intro .tag{display:inline-block;background:rgba(201,168,76,.2);color:var(--gold);border-radius:20px;padding:4px 14px;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:14px}
+.bigfive-intro h2{font-family:"Syne",sans-serif;font-size:26px;font-weight:800;margin-bottom:10px}
+.bigfive-intro p{font-size:14px;color:rgba(255,255,255,.6);max-width:480px;margin:0 auto;line-height:1.6}
+.bigfive-body{flex:1;padding:36px 32px;max-width:720px;margin:0 auto;width:100%}
+.bf-progress{display:flex;gap:5px;margin-bottom:28px}
+.bf-dot{flex:1;height:4px;border-radius:2px;background:var(--border);transition:background .3s}
+.bf-dot.done{background:var(--gold)}.bf-dot.active{background:var(--gold-light)}
+.bf-question{font-family:"Syne",sans-serif;font-size:19px;font-weight:700;color:var(--navy);margin-bottom:7px;line-height:1.3}
+.bf-sub{font-size:13px;color:var(--text-mid);margin-bottom:24px}
+.bf-scale{display:flex;gap:9px}
+.bf-btn{flex:1;padding:14px 6px;border:1.5px solid var(--border);border-radius:10px;text-align:center;cursor:pointer;background:#fff;transition:all .15s}
+.bf-btn:hover{border-color:var(--gold);transform:translateY(-2px)}
+.bf-btn.selected{background:var(--navy);border-color:var(--navy);color:#fff}
+.bf-num{font-family:"Syne",sans-serif;font-size:20px;font-weight:800;display:block}
+.bf-lbl{font-size:9px;opacity:.6;display:block;margin-top:3px}
+.bf-scale-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--text-light);margin-top:7px}
+#screen-success{background:var(--navy);align-items:center;justify-content:center;text-align:center}
+.success-box{max-width:480px;padding:40px}
+.success-icon{width:76px;height:76px;border-radius:50%;background:rgba(201,168,76,.15);border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;margin:0 auto 22px;font-size:30px}
+.success-box h2{font-family:"Syne",sans-serif;font-size:26px;font-weight:800;color:#fff;margin-bottom:10px}
+.success-box p{font-size:14px;color:rgba(255,255,255,.5);line-height:1.6;margin-bottom:28px}
+.btn-dl-pdf{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;padding:14px;background:var(--gold);border:none;border-radius:10px;font-family:"Syne",sans-serif;font-size:14px;font-weight:700;color:var(--navy);cursor:pointer;transition:all .2s;margin-bottom:10px}
+.btn-dl-pdf:hover{background:var(--gold-light);transform:translateY(-1px)}
+.btn-dl-pdf:disabled{opacity:.6;cursor:not-allowed;transform:none}
+.pdf-status{font-size:13px;color:rgba(255,255,255,.4);min-height:18px}
+#screen-dashboard,#screen-bigfive-dash{background:var(--cream);flex-direction:column}
+.dash-header{background:var(--navy);padding:0 32px;display:flex;align-items:center;height:60px;position:sticky;top:0;z-index:100}
+.dash-brand{font-family:"Syne",sans-serif;font-size:12px;font-weight:700;letter-spacing:3px;color:var(--gold);text-transform:uppercase}
+.dash-nav{display:flex;gap:4px;margin-left:auto}
+.dash-nav-btn{padding:7px 15px;border-radius:8px;font-size:12px;font-weight:600;color:rgba(255,255,255,.5);cursor:pointer;background:transparent;border:none;font-family:inherit;transition:all .15s}
+.dash-nav-btn:hover{color:#fff;background:rgba(255,255,255,.08)}
+.dash-nav-btn.active{color:var(--gold);background:rgba(201,168,76,.1)}
+.logout-btn{padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;color:rgba(255,255,255,.4);cursor:pointer;background:transparent;border:1px solid rgba(255,255,255,.1);font-family:inherit;margin-left:8px;transition:all .15s}
+.logout-btn:hover{border-color:rgba(255,255,255,.3);color:#fff}
+.dash-body{flex:1;padding:28px 32px;max-width:1160px;margin:0 auto;width:100%}
+.dash-title{font-family:"Syne",sans-serif;font-size:22px;font-weight:800;color:var(--navy);margin-bottom:3px}
+.dash-sub{font-size:13px;color:var(--text-mid);margin-bottom:22px}
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.kpi-card{background:#fff;border-radius:13px;padding:18px 20px;border:1px solid var(--border);position:relative;overflow:hidden}
+.kpi-card::before{content:"";position:absolute;top:0;left:0;right:0;height:3px}
+.kpi-card.gold::before{background:var(--gold)}.kpi-card.green::before{background:var(--green)}.kpi-card.blue::before{background:#2E5FA3}.kpi-card.orange::before{background:var(--orange)}
+.kpi-label{font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--text-light);margin-bottom:7px}
+.kpi-value{font-family:"Syne",sans-serif;font-size:30px;font-weight:800;color:var(--navy)}
+.kpi-unit{font-size:12px;color:var(--text-light);margin-top:2px}
+.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:20px}
+.chart-card{background:#fff;border-radius:13px;padding:22px;border:1px solid var(--border)}
+.chart-card.full{grid-column:1/-1}
+.chart-title{font-family:"Syne",sans-serif;font-size:13px;font-weight:700;color:var(--navy);margin-bottom:3px}
+.chart-sub{font-size:11px;color:var(--text-light);margin-bottom:18px}
+.filter-bar{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap}
+.filter-sel{padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;color:var(--text);background:#fff;appearance:none;cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'12\' height=\'12\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%237A8BA8\' stroke-width=\'2\'%3E%3Cpath d=\'m6 9 6 6 6-6\'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 9px center;padding-right:28px;font-family:inherit}
+.filter-sel:focus{outline:none;border-color:var(--gold)}
+.responses-table{width:100%;border-collapse:separate;border-spacing:0 5px}
+.responses-table th{font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--text-light);padding:0 11px 7px;text-align:left}
+.responses-table td{padding:11px;background:#fff;font-size:13px}
+.responses-table td:first-child{border-radius:8px 0 0 8px;padding-left:15px}
+.responses-table td:last-child{border-radius:0 8px 8px 0}
+.responses-table tr:hover td{background:var(--gold-pale)}
+.badge{display:inline-flex;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600}
+.badge.high{background:rgba(42,125,95,.1);color:var(--green)}.badge.mid{background:rgba(212,133,58,.1);color:var(--orange)}.badge.low{background:rgba(192,57,43,.1);color:var(--red)}
+.pain-tag{display:inline-flex;padding:4px 11px;border-radius:20px;font-size:12px;font-weight:500;background:var(--gold-pale);color:var(--navy);margin:3px}
+.pain-tag.size-lg{font-size:15px;padding:6px 15px}.pain-tag.size-sm{font-size:10px;padding:3px 9px;opacity:.7}
+.radar-wrap{position:relative;height:250px}
+.empty-state{text-align:center;padding:50px 20px;color:var(--text-light)}
+.empty-state .es-icon{font-size:36px;margin-bottom:10px;opacity:.4}
+.config-banner{background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.25);border-radius:12px;padding:16px 20px;margin-bottom:20px;display:flex;align-items:flex-start;gap:12px}
+.config-banner .cb-icon{font-size:18px;flex-shrink:0;margin-top:1px}
+.config-banner .cb-body{flex:1;font-size:13px;color:var(--text-mid);line-height:1.6}
+.config-banner .cb-body strong{color:var(--navy)}
+.config-banner input{width:100%;margin-top:8px;padding:9px 13px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit}
+.config-banner input:focus{outline:none;border-color:var(--gold)}
+.btn-save-cfg{margin-top:8px;padding:8px 17px;background:var(--navy);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit}
+.btn-pdf-sm{display:inline-flex;align-items:center;gap:5px;padding:7px 13px;background:var(--gold);color:var(--navy);border:none;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;letter-spacing:.3px;transition:all .2s;font-family:"Syne",sans-serif}
+.btn-pdf-sm:hover{background:var(--gold-light)}.btn-pdf-sm:disabled{opacity:.5;cursor:not-allowed}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="screen-login" class="screen active">
+  <div class="login-box">
+    <div class="wordmark">UNIVERSIDADE INSPIRA</div>
+    <div class="login-sub-text">Diagnóstico de Liderança 2025</div>
+    <div class="login-options">
+      <div class="login-opt selected" id="opt-survey" onclick="selectOpt('survey')">
+        <div class="opt-icon">📋</div><div class="opt-label">Pesquisa</div>
+      </div>
+      <div class="login-opt" id="opt-dash" onclick="selectOpt('dashboard')">
+        <div class="opt-icon">📊</div><div class="opt-label">Dashboard</div>
+      </div>
+    </div>
+    <div id="dash-pw-wrap" style="display:none">
+      <div class="login-field"><label>Senha de acesso</label>
+        <input type="password" id="dash-pw" placeholder="••••••••" onkeydown="if(event.key==='Enter')dLogin()">
+      </div>
+      <button class="btn-primary" onclick="dLogin()">Acessar Dashboard</button>
+      <div class="login-error" id="login-err">Senha incorreta.</div>
+    </div>
+    <div id="survey-btn-wrap">
+      <button class="btn-primary" onclick="startSurvey()">Iniciar Pesquisa →</button>
+    </div>
+  </div>
+</div>
+
+<!-- SURVEY -->
+<div id="screen-survey" class="screen">
+  <div class="survey-header">
+    <div class="brand">UNIVERSIDADE INSPIRA</div>
+    <div class="progress-wrap">
+      <div class="progress-label"><span id="prog-text"></span><span id="prog-pct"></span></div>
+      <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    </div>
+    <div style="font-size:11px;color:rgba(255,255,255,.3)">Confidencial</div>
+  </div>
+  <div class="survey-body" id="survey-body"></div>
+</div>
+
+<!-- BIG FIVE -->
+<div id="screen-bigfive" class="screen">
+  <div class="bigfive-intro">
+    <div class="tag">Mapeamento de Personalidade</div>
+    <h2>Perfil Big Five</h2>
+    <p>Responda com base em como você realmente é — não como gostaria de ser. Não há respostas certas ou erradas.</p>
+  </div>
+  <div class="bigfive-body">
+    <div class="bf-progress" id="bf-prog"></div>
+    <div id="bf-qa"></div>
+    <div class="survey-nav">
+      <button class="btn-nav btn-back" id="bf-back" onclick="bfNav(-1)">← Anterior</button>
+      <span class="step-counter" id="bf-ctr"></span>
+      <button class="btn-nav btn-next" id="bf-next" onclick="bfNav(1)">Próxima →</button>
+    </div>
+  </div>
+</div>
+
+<!-- SUCCESS -->
+<div id="screen-success" class="screen">
+  <div class="success-box">
+    <div class="success-icon">✓</div>
+    <h2>Obrigado pela sua contribuição!</h2>
+    <p>Suas respostas foram salvas. Clique abaixo para baixar seu relatório de perfil de liderança personalizado.</p>
+    <button class="btn-dl-pdf" id="dl-btn" onclick="downloadPDF()">📄 Baixar Relatório PDF</button>
+    <div class="pdf-status" id="pdf-status"></div>
+    <div style="margin-top:18px"><a onclick="goHome()" style="font-size:12px;color:rgba(255,255,255,.3);cursor:pointer">← Voltar ao início</a></div>
+  </div>
+</div>
+
+<!-- DASHBOARD PESQUISA -->
+<div id="screen-dashboard" class="screen">
+  <div class="dash-header">
+    <div class="dash-brand">UNIVERSIDADE INSPIRA</div>
+    <div class="dash-nav">
+      <button class="dash-nav-btn active" onclick="switchTab('survey')">Pesquisa</button>
+      <button class="dash-nav-btn" onclick="switchTab('bigfive')">Big Five</button>
+    </div>
+    <button class="logout-btn" onclick="logout()">Sair</button>
+  </div>
+  <div class="dash-body">
+    <div class="dash-title">Dashboard — Diagnóstico de Liderança</div>
+    <div class="dash-sub" id="d-sub">Carregando...</div>
+    <div id="gs-banner"></div>
+    <div class="kpi-grid" id="d-kpis"></div>
+    <div class="filter-bar" id="d-filters"></div>
+    <div class="charts-grid" id="d-charts"></div>
+    <div class="chart-card" style="margin-bottom:22px">
+      <div class="chart-title">Respostas Individuais</div>
+      <div class="chart-sub">Todas as submissões</div>
+      <div style="overflow-x:auto"><table class="responses-table" id="d-table"></table></div>
+    </div>
+  </div>
+</div>
+
+<!-- DASHBOARD BIG FIVE -->
+<div id="screen-bigfive-dash" class="screen">
+  <div class="dash-header">
+    <div class="dash-brand">UNIVERSIDADE INSPIRA</div>
+    <div class="dash-nav">
+      <button class="dash-nav-btn" onclick="switchTab('survey')">Pesquisa</button>
+      <button class="dash-nav-btn active" onclick="switchTab('bigfive')">Big Five</button>
+    </div>
+    <button class="logout-btn" onclick="logout()">Sair</button>
+  </div>
+  <div class="dash-body">
+    <div class="dash-title">Dashboard — Perfil Big Five</div>
+    <div class="dash-sub">Análise coletiva de personalidade e liderança</div>
+    <div class="kpi-grid" id="bf-kpis"></div>
+    <div class="filter-bar" id="bf-filters"></div>
+    <div class="charts-grid" id="bf-charts"></div>
+    <div class="chart-card" style="margin-bottom:22px">
+      <div class="chart-title">Resultados Individuais — Big Five</div>
+      <div class="chart-sub">Com download de relatório em PDF por diretor</div>
+      <div style="overflow-x:auto"><table class="responses-table" id="bf-table"></table></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── CONFIG
+const DASH_PW = 'uni.inspira';
+let SHEETS_URL = localStorage.getItem('inspira_gs_url') || '';
+
+// ── BRANDS
+const BRANDS={
+  "Acesso":["Almirante Tamandaré","Boqueirão","Campo Largo","Campo Largo Kids","Fazenda Rio Grande","Pinhais","Santa Felicidade","São José"],
+  "Amadeus":["Amadeus"],"Anchieta":["Aquarius","Bela Vista","Patamares","Pituba"],
+  "C7S":["Edilson Brasil","Eusébio","Nila Gomes","Núcleo Edilson Brasil"],
+  "Centro de Estudos":["Campos","Conselheiro Thomaz"],
+  "Colégio São Paulo":["São Paulo","Tempo de Criança"],
+  "Contemporâneo":["Cidade Verde","Lagoa Nova"],"Crescimento":["Calhau","Renascença"],
+  "ECB":["Águas Claras","Belém","Brasília"],"ECN":["Itacoatiara","Piratininga"],
+  "Elite":["Emiliano Perneta","Inácio Lustosa"],"ESTA":["São Bento"],
+  "Global Me":["Itaim","Jardins"],"Guroo":["Guroo"],
+  "IDAAM":["Cachoeirinha","Cidade Nova","Djalma","Morada do Sol","Parque 10","Torquato"],
+  "Interação":["Capim Dourado","Teotônio"],"Itamarati":["Itamarati"],
+  "JPI":["Beira Rio","JPI"],
+  "Leonardo da Vinci":["Alphaville 1","Alphaville 2","Butantã","Granja Viana","Jabaquara","Jardins","Osasco"],
+  "Magnum":["Lourdes","Nova Floresta"],"Marília Mattoso":["Icaraí","Marília Mattoso"],
+  "Mira":["Niterói"],"Múltiplo":["Múltiplo"],
+  "Novo Tempo":["Aureliano Coutinho","Castro Alves"],
+  "Over":["Abel Cabral","Lima e Silva","Marcílio Furtado","Mossoró","Nascimento de Castro","Ponta Negra","Primeiro Mundo JP","Zona Norte"],
+  "PB":["Barra","Icaraí 2","Icaraí 3","PB Curso","Região Oceânica","Tijuca"],
+  "Pequeno Príncipe Studium":["Pequeno Príncipe Studium"],
+  "Physics":["3 Corações","Alcindo Cacela 1","Almirante Barroso","Augusto Montenegro","Batista Campos","Castanhal","Conselheiro Furtado","Macapá","Umarizal"],
+  "PontoMed":["PontoMed"],"Portinari":["Portinari"],
+  "Primeiro Mundo":["Primeiro Mundo","Vila Velha"],"Primeiro Mundo Vale":["Canaã","Ourilândia"],
+  "Simbios":["Bueno","Young"],"Stella Maris":["Água Verde","Juvevê","Xaxim"],
+  "Universitário":["Universitário"],"amais":["Rio","Blumenau"],
+  "Central":["G&G","Suprimentos","Comercial","CSC","Operações Escolares","Jurídico","Contabilidade","DP","Expansões","TI","Marketing","RI","M&A","Planejamento Financeiro","Pedagógico","Presidência","Financeiro","Integração","Amais","Infraestrutura"]
+};
+
+// ── SURVEY BLOCKS
+const BLOCKS=[
+  {id:'perfil',tag:'Bloco 1',title:'Seu Perfil',desc:'Informações básicas para segmentação dos resultados.',fields:[
+    {id:'nome',type:'text',label:'Nome completo',req:true,ph:'Seu nome completo'},
+    {id:'email',type:'email',label:'E-mail',req:true,ph:'seu@email.com'},
+    {id:'marca',type:'brand',label:'Marca',req:true},
+    {id:'unidade',type:'unit',label:'Unidade',req:true},
+    {id:'tempo',type:'radio',label:'Tempo de atuação como diretor(a)',req:true,opts:['Menos de 1 ano','1 a 3 anos','3 a 5 anos','Mais de 5 anos']},
+    {id:'etapas',type:'check',label:'Etapas atendidas <span>(pode marcar mais de uma)</span>',req:false,opts:['Educação Infantil','Ensino Fundamental I','Ensino Fundamental II','Ensino Médio']}
+  ]},
+  {id:'comp',tag:'Bloco 2',title:'Autoavaliação de Competências',desc:'Avalie seu nível atual em cada competência. Escala de 1 (muito baixo) a 5 (muito alto).',fields:[
+    {id:'comp',type:'likert',label:'',req:true,items:['Tomada de decisão estratégica','Gestão por dados e indicadores','Liderança pedagógica (obs. de aulas + feedback)','Desenvolvimento e engajamento de equipe','Comunicação com famílias e gestão de conflitos','Gestão operacional e financeira básica']}
+  ]},
+  {id:'dores',tag:'Bloco 3',title:'Dores e Desafios',desc:'O que mais pesa no seu dia a dia como diretor(a)?',fields:[
+    {id:'desafios',type:'textarea',label:'Quais são seus 3 maiores desafios hoje?',req:true,ph:'Descreva brevemente...'},
+    {id:'tempo_cons',type:'radio',label:'O que mais consome seu tempo?',req:true,opts:['Demandas operacionais','Gestão de pessoas','Questões pedagógicas','Atendimento a famílias','Processos administrativos']},
+    {id:'inseguranca',type:'radio',label:'Em que área você se sente mais inseguro(a)?',req:true,opts:['Liderança pedagógica','Gestão por dados','Gestão de pessoas','Financeiro / orçamento','Comunicação com famílias']}
+  ]},
+  {id:'form',tag:'Bloco 4',title:'Necessidades de Formação',desc:'O que você precisa para crescer como líder escolar?',fields:[
+    {id:'temas',type:'check',label:'Temas prioritários de desenvolvimento <span>(até 3)</span>',req:true,opts:['Gestão por dados e indicadores','Liderança pedagógica','Gestão de pessoas','Planejamento estratégico','Gestão financeira','Comunicação com famílias','Tecnologia e inovação']},
+    {id:'formato',type:'radio',label:'Formato de aprendizagem preferido',req:true,opts:['Cursos online curtos e diretos','Programa modular aprofundado','Encontros presenciais','Mentoria individual','Troca entre diretores (pares)']},
+    {id:'barreiras',type:'radio',label:'Principal barreira ao seu desenvolvimento',req:true,opts:['Falta de tempo','Excesso de demandas operacionais','Falta de formação estruturada','Falta de clareza de prioridades']}
+  ]},
+  {id:'exp',tag:'Bloco 5',title:'Expectativas',desc:'O que você espera da Universidade Inspira?',fields:[
+    {id:'expectativa',type:'textarea',label:'O que tornaria a Universidade Inspira realmente útil para você?',req:true,ph:'Seja direto(a)...'}
+  ]}
+];
+
+// ── BIG FIVE
+const BFQ=[
+  {id:'O1',t:'O',q:'Tenho curiosidade por ideias novas e gosto de explorar perspectivas diferentes.',r:false},
+  {id:'C1',t:'C',q:'Costumo ser organizado(a) e cumprir meus compromissos com rigor.',r:false},
+  {id:'E1',t:'E',q:'Me sinto energizado(a) ao liderar reuniões e interagir com minha equipe.',r:false},
+  {id:'A1',t:'A',q:'Priorizo o bem-estar da minha equipe mesmo quando há pressão por resultados.',r:false},
+  {id:'N1',t:'N',q:'Sob pressão intensa, fico ansioso(a) ou sinto dificuldade de manter a calma.',r:false},
+  {id:'O2',t:'O',q:'Prefiro soluções testadas e comprovadas a experimentar abordagens novas.',r:true},
+  {id:'C2',t:'C',q:'Tenho dificuldade em manter disciplina com metas e prazos de longo prazo.',r:true},
+  {id:'E2',t:'E',q:'Prefiro trabalhar de forma independente a liderar grupos grandes.',r:true},
+  {id:'A2',t:'A',q:'Consigo tomar decisões difíceis mesmo que desagradem pessoas da equipe.',r:false},
+  {id:'N2',t:'N',q:'Me recupero rapidamente de erros ou situações frustrantes.',r:true},
+  {id:'O3',t:'O',q:'Busco ativamente aprender sobre tendências em educação e gestão escolar.',r:false},
+  {id:'C3',t:'C',q:'Planejo minha semana com antecedência e reviso metas com regularidade.',r:false},
+  {id:'E3',t:'E',q:'Me sinto confortável ao representar a escola em eventos externos ou com famílias.',r:false},
+  {id:'A3',t:'A',q:'Tenho facilidade em ouvir críticas sem reagir de forma defensiva.',r:false},
+  {id:'N3',t:'N',q:'Situações de conflito na escola me geram desgaste emocional significativo.',r:false},
+];
+const BFI={
+  O:{name:'Abertura',color:'#7B5EA7',desc:'Curiosidade intelectual, criatividade e abertura a novas experiências.'},
+  C:{name:'Conscienciosidade',color:'#2A7D5F',desc:'Organização, disciplina e foco consistente em resultados.'},
+  E:{name:'Extroversão',color:'#2E5FA3',desc:'Energia social, assertividade e liderança visível.'},
+  A:{name:'Amabilidade',color:'#C9A84C',desc:'Empatia, cooperação e construção de relações de confiança.'},
+  N:{name:'Estabilidade Emocional',color:'#C0392B',desc:'Resiliência, equilíbrio sob pressão e regulação emocional.'}
+};
+const PROFILES={
+  O:{title:'Líder Inovador',desc:'Você tem alta abertura a novas experiências e visão criativa. Tende a questionar o status quo e trazer perspectivas inovadoras para a gestão escolar. Seu desafio é equilibrar experimentação com consistência operacional.'},
+  C:{title:'Líder Executor',desc:'Você é altamente organizado(a), disciplinado(a) e orientado(a) a resultados. Cumpre metas com rigor e mantém a equipe focada. Seu desafio é manter flexibilidade quando a rigidez não serve à situação.'},
+  E:{title:'Líder Influenciador',desc:'Você tem energia social elevada, assertividade natural e conforto em situações de liderança visível. Mobiliza pessoas com facilidade. Seu desafio é cultivar escuta ativa e profundidade nas relações.'},
+  A:{title:'Líder Colaborativo',desc:'Você constrói relações de confiança e prioriza o bem-estar da equipe. É empático(a) e facilita ambientes colaborativos. Seu desafio é tomar decisões difíceis sem se paralisar pelo impacto emocional.'},
+  N:{title:'Líder Resiliente',desc:'Você demonstra alta estabilidade emocional e resiliência sob pressão. Mantém equilíbrio em situações de crise. Seu diferencial é ser uma âncora para a equipe em momentos difíceis.'}
+};
+
+// ── STATE
+let S={block:0,ans:{},bfi:0,bfans:{},entry:null,charts:{}};
+let localSurveys=JSON.parse(localStorage.getItem('i_surveys')||'[]');
+let localBF=JSON.parse(localStorage.getItem('i_bigfive')||'[]');
+
+// ── SHEETS
+async function sheetsPost(sheet,data){
+  if(!SHEETS_URL)return;
+  try{await fetch(SHEETS_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({sheet,data})});}catch(e){}
+}
+async function sheetsGet(sheet){
+  if(!SHEETS_URL)return null;
+  try{const r=await fetch(SHEETS_URL+'?sheet='+sheet);const j=await r.json();return j.data||[];}catch(e){return null;}
+}
+
+// ── NAV
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('screen-'+id).classList.add('active');window.scrollTo(0,0);}
+function selectOpt(m){
+  document.getElementById('opt-survey').classList.toggle('selected',m==='survey');
+  document.getElementById('opt-dash').classList.toggle('selected',m==='dashboard');
+  document.getElementById('dash-pw-wrap').style.display=m==='dashboard'?'block':'none';
+  document.getElementById('survey-btn-wrap').style.display=m==='survey'?'block':'none';
+}
+function dLogin(){const p=document.getElementById('dash-pw');if(p.value===DASH_PW){document.getElementById('login-err').style.display='none';show('dashboard');renderDash();}else{document.getElementById('login-err').style.display='block';}}
+function logout(){show('login');document.getElementById('dash-pw').value='';}
+function goHome(){show('login');}
+function startSurvey(){S={block:0,ans:{},bfi:0,bfans:{},entry:null,charts:{}};show('survey');renderBlock();}
+function switchTab(t){if(t==='survey'){show('dashboard');renderDash();}else{show('bigfive-dash');renderBFDash();}}
+
+// ── SURVEY RENDER
+function renderBlock(){
+  const bl=BLOCKS[S.block],tot=BLOCKS.length,pct=Math.round(S.block/tot*100);
+  document.getElementById('prog-text').textContent=`Bloco ${S.block+1} de ${tot}`;
+  document.getElementById('prog-pct').textContent=pct+'%';
+  document.getElementById('prog-fill').style.width=pct+'%';
+  let h=`<div class="block-tag">${bl.tag} · ${tot}</div><div class="block-title">${bl.title}</div><div class="block-desc">${bl.desc}</div>`;
+  bl.fields.forEach(f=>h+=rField(f));
+  const last=S.block===tot-1;
+  h+=`<div class="survey-nav">${S.block>0?'<button class="btn-nav btn-back" onclick="sNav(-1)">← Anterior</button>':'<div></div>'}<span class="step-counter">${S.block+1}/${tot}</span>${last?'<button class="btn-nav btn-submit" onclick="submitSurvey()">Concluir e ir para o Big Five →</button>':'<button class="btn-nav btn-next" onclick="sNav(1)">Próximo →</button>'}</div>`;
+  document.getElementById('survey-body').innerHTML=h;window.scrollTo(0,0);
+  if(S.ans.marca)setTimeout(()=>{const m=document.getElementById('f_marca');if(m){m.value=S.ans.marca;updUnits();}},80);
+}
+function rField(f){
+  const sv=S.ans[f.id];
+  if(f.type==='text'||f.type==='email')return`<div class="field"><label class="field-label">${f.label}${f.req?' *':''}</label><input type="${f.type}" id="f_${f.id}" placeholder="${f.ph||''}" value="${sv||''}"></div>`;
+  if(f.type==='brand')return`<div class="field"><label class="field-label">${f.label} *</label><select id="f_marca" onchange="updUnits()"><option value="">Selecione a marca...</option>${Object.keys(BRANDS).map(b=>`<option${sv===b?' selected':''}>${b}</option>`).join('')}</select></div>`;
+  if(f.type==='unit')return`<div class="field"><label class="field-label">${f.label} *</label><select id="f_unidade"><option value="">Selecione primeiro a marca...</option></select></div>`;
+  if(f.type==='radio')return`<div class="field"><label class="field-label">${f.label} *</label><div class="options-grid">${f.opts.map(o=>`<label class="option-item${sv===o?' selected':''}" onclick="selOpt(this,'${f.id}')"><div class="option-dot"></div>${o}</label>`).join('')}</div></div>`;
+  if(f.type==='check'){const sa=sv||[];return`<div class="field"><label class="field-label">${f.label}</label><div class="options-grid col2">${f.opts.map(o=>`<label class="option-item${sa.includes(o)?' selected':''}" onclick="togCheck(this,'${f.id}','${o}')"><div class="option-dot check-dot" style="border-radius:4px"></div>${o}</label>`).join('')}</div></div>`;}
+  if(f.type==='textarea')return`<div class="field"><label class="field-label">${f.label} *</label><textarea id="f_${f.id}" placeholder="${f.ph||''}" rows="4">${sv||''}</textarea></div>`;
+  if(f.type==='likert')return`<div class="field"><table class="likert-table"><thead><tr><th>Competência</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th></tr></thead><tbody>${f.items.map((it,idx)=>{const sv2=sv?sv[idx]:null;return`<tr><td>${it}</td>${[1,2,3,4,5].map(v=>`<td style="text-align:center"><div class="likert-radio${sv2==v?' checked':''}" onclick="setLik('${f.id}',${idx},${v},this)"></div></td>`).join('')}</tr>`;}).join('')}</tbody></table><div class="scale-labels"><span>1 = Muito baixo</span><span>5 = Muito alto</span></div></div>`;
+  return'';
+}
+function updUnits(){const m=document.getElementById('f_marca').value,s=document.getElementById('f_unidade');if(!s)return;S.ans.marca=m;s.innerHTML=`<option value="">Selecione a unidade...</option>`+(BRANDS[m]||[]).map(u=>`<option${S.ans.unidade===u?' selected':''}>${u}</option>`).join('');}
+function selOpt(el,fid){el.parentElement.querySelectorAll('.option-item').forEach(i=>i.classList.remove('selected'));el.classList.add('selected');S.ans[fid]=el.textContent.trim();}
+function togCheck(el,fid,v){if(!S.ans[fid])S.ans[fid]=[];if(el.classList.contains('selected')){el.classList.remove('selected');S.ans[fid]=S.ans[fid].filter(x=>x!==v);}else{el.classList.add('selected');S.ans[fid].push(v);}}
+function setLik(fid,idx,v,el){if(!S.ans[fid])S.ans[fid]={};S.ans[fid][idx]=v;el.closest('tr').querySelectorAll('.likert-radio').forEach(r=>r.classList.remove('checked'));el.classList.add('checked');}
+function collectAns(){
+  const bl=BLOCKS[S.block];
+  bl.fields.forEach(f=>{
+    if(['text','email','textarea'].includes(f.type)){const e=document.getElementById('f_'+f.id);if(e)S.ans[f.id]=e.value.trim();}
+    if(f.type==='unit'){const e=document.getElementById('f_unidade');if(e)S.ans.unidade=e.value;}
+  });
+}
+function valBlock(){
+  const bl=BLOCKS[S.block];
+  for(const f of bl.fields){
+    if(!f.req)continue;
+    if(f.type==='brand'){const e=document.getElementById('f_marca');if(!e?.value){alert('Selecione a marca.');return false;}}
+    if(f.type==='unit'){const e=document.getElementById('f_unidade');if(!e?.value){alert('Selecione a unidade.');return false;}}
+    if(['text','email','textarea'].includes(f.type)){const e=document.getElementById('f_'+f.id);if(!e?.value.trim()){alert('Preencha: '+f.label.replace(/<[^>]*>/g,''));return false;}if(f.type==='email'&&!/\S+@\S+\.\S+/.test(e.value)){alert('E-mail inválido.');return false;}}
+    if(f.type==='radio'&&!S.ans[f.id]){alert('Responda: '+f.label);return false;}
+    if(f.type==='likert'&&f.items){const a=S.ans[f.id]||{};if(Object.keys(a).length<f.items.length){alert('Avalie todas as competências.');return false;}}
+  }return true;
+}
+function sNav(d){collectAns();if(d===1&&!valBlock())return;S.block+=d;renderBlock();}
+async function submitSurvey(){
+  collectAns();if(!valBlock())return;
+  const entry={...S.ans,ts:new Date().toISOString(),id:Date.now()};
+  localSurveys.push(entry);localStorage.setItem('i_surveys',JSON.stringify(localSurveys));
+  const row=[entry.ts,entry.nome,entry.email,entry.marca,entry.unidade,entry.tempo,(entry.etapas||[]).join(', '),
+    ...[0,1,2,3,4,5].map(i=>entry.comp?entry.comp[i]||'':''),
+    entry.desafios,entry.tempo_cons,entry.inseguranca,(entry.temas||[]).join(', '),entry.formato,entry.barreiras,entry.expectativa];
+  sheetsPost('Pesquisa',row);
+  S.ans=entry;S.bfi=0;S.bfans={};show('bigfive');renderBFQ();
+}
+
+// ── BIG FIVE RENDER
+function renderBFQ(){
+  const q=BFQ[S.bfi],tot=BFQ.length;
+  document.getElementById('bf-prog').innerHTML=BFQ.map((_,i)=>`<div class="bf-dot${i<S.bfi?' done':i===S.bfi?' active':''}"></div>`).join('');
+  const sv=S.bfans[q.id];
+  const lbls=['Discordo totalmente','Discordo','Neutro','Concordo','Concordo totalmente'];
+  document.getElementById('bf-qa').innerHTML=`<div class="bf-question">${q.q}</div><div class="bf-sub">Quanto você concorda com esta afirmação?</div><div class="bf-scale">${[1,2,3,4,5].map((v,i)=>`<div class="bf-btn${sv==v?' selected':''}" onclick="selBF('${q.id}',${v},this)"><span class="bf-num">${v}</span><span class="bf-lbl">${lbls[i]}</span></div>`).join('')}</div><div class="bf-scale-labels"><span>Discordo totalmente</span><span>Concordo totalmente</span></div>`;
+  document.getElementById('bf-ctr').textContent=`${S.bfi+1} de ${tot}`;
+  document.getElementById('bf-back').style.display=S.bfi===0?'none':'';
+  document.getElementById('bf-next').textContent=S.bfi===tot-1?'Ver meu Resultado →':'Próxima →';
+}
+function selBF(qid,v,el){S.bfans[qid]=v;el.closest('.bf-scale').querySelectorAll('.bf-btn').forEach(b=>b.classList.remove('selected'));el.classList.add('selected');}
+function bfNav(d){
+  if(d===1){if(!S.bfans[BFQ[S.bfi].id]){alert('Selecione uma resposta.');return;}if(S.bfi===BFQ.length-1){finalizeBF();return;}}
+  S.bfi+=d;renderBFQ();window.scrollTo(0,0);
+}
+function calcBF(){
+  const sums={O:[],C:[],E:[],A:[],N:[]};
+  BFQ.forEach(q=>{let v=S.bfans[q.id]||3;if(q.r)v=6-v;sums[q.t].push(v);});
+  const res={};Object.entries(sums).forEach(([t,vals])=>{res[t]=Math.round(vals.reduce((a,b)=>a+b,0)/vals.length*20);});
+  res.N=100-res.N;return res;
+}
+function getRecs(sc){
+  const r=[];
+  if(sc.O<50)r.push('Participar de programas de inovação pedagógica e visitas a escolas referência.');
+  else r.push('Canalizar a criatividade em projetos com metas e métricas claras de impacto.');
+  if(sc.C<50)r.push('Adotar sistema de gestão semanal com revisão estruturada de metas e indicadores.');
+  else r.push('Desenvolver delegação eficaz para liberar sua capacidade estratégica.');
+  if(sc.E<50)r.push('Investir em comunicação assertiva e presença em reuniões com famílias e equipe.');
+  else r.push('Praticar escuta ativa e desenvolver lideranças intermediárias na equipe.');
+  return r.slice(0,3);
+}
+async function finalizeBF(){
+  const sc=calcBF();
+  const dom=Object.entries(sc).sort((a,b)=>b[1]-a[1])[0][0];
+  const entry={nome:S.ans.nome,email:S.ans.email,marca:S.ans.marca,unidade:S.ans.unidade,scores:sc,profile:PROFILES[dom],ts:new Date().toISOString(),id:Date.now()};
+  localBF.push(entry);localStorage.setItem('i_bigfive',JSON.stringify(localBF));S.entry=entry;
+  const row=[entry.ts,entry.nome,entry.email,entry.marca,entry.unidade,entry.profile.title,...['O','C','E','A','N'].map(t=>sc[t]),...BFQ.map(q=>S.bfans[q.id]||'')];
+  sheetsPost('BigFive',row);
+  show('success');
+}
+
+// ── PDF GENERATION (usando jsPDF puro — sem dependência de servidor)
+async function downloadPDF(){
+  const e=S.entry;if(!e){alert('Dados não encontrados.');return;}
+  const btn=document.getElementById('dl-btn'),st=document.getElementById('pdf-status');
+  btn.disabled=true;btn.innerHTML='⏳ Gerando relatório...';st.textContent='Aguarde alguns segundos...';
+  try{
+    await buildAndDownloadPDF(e);
+    btn.disabled=false;btn.innerHTML='✅ Relatório baixado!';st.textContent='Verifique sua pasta de downloads.';
+  }catch(err){
+    console.error(err);
+    btn.disabled=false;btn.innerHTML='📄 Baixar Relatório PDF';st.textContent='Erro ao gerar. Tente novamente.';
+  }
+}
+
+function buildAndDownloadPDF(e){
+  return new Promise((resolve,reject)=>{
+    try{
+      if(!window.jspdf){reject(new Error('jsPDF não carregado'));return;}
+      const {jsPDF}=window.jspdf;
+      const doc=new jsPDF({orientation:'portrait',unit:'pt',format:'a4'});
+      const W=595.28,H=841.89;
+      const NAVY=[11,22,40],GOLD=[201,168,76],CREAM=[250,247,242],WHITE=[255,255,255];
+      const TRAIT_COLORS={O:[123,94,167],C:[42,125,95],E:[46,95,163],A:[201,168,76],N:[192,57,43]};
+      const traits=['O','C','E','A','N'];
+      const sc=e.scores;
+      const sorted=traits.map(t=>({t,s:sc[t],info:BFI[t]})).sort((a,b)=>b.s-a.s);
+      const recs=getRecs(sc);
+
+      // ─── PAGE 1: CAPA
+      doc.setFillColor(...NAVY);doc.rect(0,0,W,H,'F');
+      // Gold side bar
+      doc.setFillColor(...GOLD);doc.rect(0,0,8,H,'F');
+      // Header label
+      doc.setFontSize(8);doc.setFont('helvetica','bold');doc.setTextColor(...GOLD);
+      doc.text('UNIVERSIDADE INSPIRA',28,40);
+      doc.setFontSize(7);doc.setFont('helvetica','normal');doc.setTextColor(160,175,200);
+      doc.text('DIAGNÓSTICO DE LIDERANÇA · 2025',28,54);
+      // Title
+      doc.setFontSize(32);doc.setFont('helvetica','bold');doc.setTextColor(...WHITE);
+      doc.text('Relatório de',28,130);
+      doc.text('Perfil de',28,168);
+      doc.setTextColor(...GOLD);doc.text('Liderança',28,206);
+      // Gold line
+      doc.setDrawColor(...GOLD);doc.setLineWidth(1.5);doc.line(28,222,220,222);
+      // Person info
+      doc.setFontSize(16);doc.setFont('helvetica','bold');doc.setTextColor(...GOLD);
+      doc.text(e.nome||'Diretor(a)',28,248);
+      doc.setFontSize(11);doc.setFont('helvetica','normal');doc.setTextColor(160,175,200);
+      doc.text(`${e.marca||''} · ${e.unidade||''}`,28,266);
+      const dt=new Date(e.ts).toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
+      doc.setFontSize(9);doc.setTextColor(100,120,150);doc.text(dt,28,282);
+      // Profile box
+      doc.setFillColor(30,50,90);doc.roundedRect(28,310,W-56,90,8,8,'F');
+      doc.setFillColor(...GOLD);doc.setFontSize(7);doc.setFont('helvetica','bold');doc.setTextColor(...GOLD);
+      doc.text('PERFIL DOMINANTE',44,332);
+      doc.setFontSize(20);doc.setFont('helvetica','bold');doc.setTextColor(...WHITE);
+      doc.text(e.profile.title,44,354);
+      doc.setFontSize(8.5);doc.setFont('helvetica','normal');doc.setTextColor(160,175,200);
+      const pdesc=doc.splitTextToSize(e.profile.desc,W-90);
+      doc.text(pdesc.slice(0,2),44,370);
+      // Footer
+      doc.setFontSize(7);doc.setTextColor(60,80,110);
+      doc.text('Documento pessoal e confidencial · Universidade Inspira © 2025',28,H-20);
+      doc.text('1 / 3',W-28,H-20,{align:'right'});
+
+      // ─── PAGE 2: BIG FIVE SCORES
+      doc.addPage();
+      doc.setFillColor(...CREAM);doc.rect(0,0,W,H,'F');
+      doc.setFillColor(...NAVY);doc.rect(0,0,W,28,'F');
+      doc.setFontSize(8);doc.setFont('helvetica','bold');doc.setTextColor(...GOLD);
+      doc.text('UNIVERSIDADE INSPIRA · RELATÓRIO BIG FIVE',14,18);
+      doc.setTextColor(100,120,150);doc.text(e.nome||'',W-14,18,{align:'right'});
+
+      doc.setFontSize(18);doc.setFont('helvetica','bold');doc.setTextColor(...NAVY);
+      doc.text('Resultados Big Five',14,52);
+      doc.setFontSize(8.5);doc.setFont('helvetica','normal');doc.setTextColor(80,100,130);
+      doc.text('O modelo Big Five mede cinco dimensões fundamentais da personalidade. Seus resultados refletem tendências naturais de comportamento.',14,66);
+
+      let yy=84;
+      traits.forEach(t=>{
+        const info=BFI[t],s=sc[t],col=TRAIT_COLORS[t];
+        const lvl=s>=70?'Alto':s>=45?'Médio':'Baixo';
+        const lvlCol=s>=70?[42,125,95]:s>=45?[212,133,58]:[192,57,43];
+        doc.setFillColor(...WHITE);doc.roundedRect(14,yy,W-28,46,5,5,'F');
+        doc.setFillColor(...col);doc.roundedRect(14,yy,5,46,2,2,'F');
+        doc.setFontSize(11);doc.setFont('helvetica','bold');doc.setTextColor(...NAVY);
+        doc.text(info.name,26,yy+16);
+        doc.setFontSize(7);doc.setFont('helvetica','bold');doc.setTextColor(...lvlCol);
+        doc.text(lvl,200,yy+16);
+        doc.setFontSize(14);doc.setFont('helvetica','bold');doc.setTextColor(...NAVY);
+        doc.text(`${s}%`,W-22,yy+17,{align:'right'});
+        // Bar bg
+        doc.setFillColor(220,226,238);doc.roundedRect(26,yy+22,W-56,7,3,3,'F');
+        doc.setFillColor(...col);doc.roundedRect(26,yy+22,(W-56)*(s/100),7,3,3,'F');
+        doc.setFontSize(7.5);doc.setFont('helvetica','normal');doc.setTextColor(100,120,150);
+        doc.text(info.desc,26,yy+40);
+        yy+=54;
+      });
+      doc.setFontSize(7);doc.setTextColor(100,120,150);
+      doc.text('2 / 3',W-14,H-14,{align:'right'});
+
+      // ─── PAGE 3: PERFIL + PONTOS + RECS
+      doc.addPage();
+      doc.setFillColor(...CREAM);doc.rect(0,0,W,H,'F');
+      doc.setFillColor(...NAVY);doc.rect(0,0,W,28,'F');
+      doc.setFontSize(8);doc.setFont('helvetica','bold');doc.setTextColor(...GOLD);
+      doc.text('UNIVERSIDADE INSPIRA · PERFIL DE LIDERANÇA',14,18);
+
+      // Profile box
+      doc.setFillColor(...NAVY);doc.roundedRect(14,36,W-28,60,6,6,'F');
+      doc.setFontSize(7);doc.setFont('helvetica','bold');doc.setTextColor(...GOLD);doc.text('PERFIL DOMINANTE',24,52);
+      doc.setFontSize(16);doc.setFont('helvetica','bold');doc.setTextColor(...WHITE);doc.text(e.profile.title,24,68);
+      doc.setFontSize(8);doc.setFont('helvetica','normal');doc.setTextColor(160,175,200);
+      const pd=doc.splitTextToSize(e.profile.desc,W-60);doc.text(pd.slice(0,2),24,82);
+
+      // Strengths
+      yy=112;
+      doc.setFontSize(13);doc.setFont('helvetica','bold');doc.setTextColor(...NAVY);doc.text('Pontos Fortes',14,yy);
+      doc.setDrawColor(...GOLD);doc.setLineWidth(1);doc.line(14,yy+4,80,yy+4);yy+=14;
+      sorted.slice(0,2).forEach(it=>{
+        doc.setFillColor(...WHITE);doc.roundedRect(14,yy,W-28,34,4,4,'F');
+        doc.setFillColor(42,125,95);doc.roundedRect(14,yy,5,34,2,2,'F');
+        doc.setFontSize(10);doc.setFont('helvetica','bold');doc.setTextColor(...NAVY);
+        doc.text(`${it.info.name} · ${it.s}%`,25,yy+13);
+        doc.setFontSize(7.5);doc.setFont('helvetica','normal');doc.setTextColor(80,100,130);
+        doc.text(it.info.desc,25,yy+26);yy+=42;
+      });
+
+      // Attention
+      yy+=4;
+      doc.setFontSize(13);doc.setFont('helvetica','bold');doc.setTextColor(...NAVY);doc.text('Pontos de Atenção',14,yy);
+      doc.setDrawColor(212,133,58);doc.line(14,yy+4,100,yy+4);yy+=14;
+      sorted.slice(3).forEach(it=>{
+        doc.setFillColor(...WHITE);doc.roundedRect(14,yy,W-28,34,4,4,'F');
+        doc.setFillColor(212,133,58);doc.roundedRect(14,yy,5,34,2,2,'F');
+        doc.setFontSize(10);doc.setFont('helvetica','bold');doc.setTextColor(...NAVY);
+        doc.text(`${it.info.name} · ${it.s}%`,25,yy+13);
+        doc.setFontSize(7.5);doc.setFont('helvetica','normal');doc.setTextColor(80,100,130);
+        doc.text(it.info.desc,25,yy+26);yy+=42;
+      });
+
+      // Recs
+      yy=Math.max(yy+8,640);
+      doc.setFillColor(245,230,192);doc.roundedRect(14,yy,W-28,72,6,6,'F');
+      doc.setFontSize(11);doc.setFont('helvetica','bold');doc.setTextColor(...NAVY);
+      doc.text('Recomendações de Desenvolvimento',24,yy+16);
+      doc.setFontSize(8.5);doc.setFont('helvetica','normal');doc.setTextColor(50,60,80);
+      recs.forEach((r,i)=>{const lines=doc.splitTextToSize(`${i+1}. ${r}`,W-60);doc.text(lines[0],24,yy+30+i*14);});
+
+      doc.setFontSize(7);doc.setTextColor(100,120,150);
+      doc.text('Documento pessoal e confidencial · Universidade Inspira © 2025',14,H-14);
+      doc.text('3 / 3',W-14,H-14,{align:'right'});
+
+      doc.save(`Perfil_BigFive_${(e.nome||'Diretor').replace(/\s+/g,'_')}.pdf`);
+      resolve();
+    }catch(err){reject(err);}
+  });
+}
+
+async function downloadPDFFor(idx){
+  const entry=localBF[idx];if(!entry)return;
+  const btn=document.querySelector(`[data-pdf="${idx}"]`);
+  if(btn){btn.disabled=true;btn.textContent='⏳';}
+  const prev=S.entry;S.entry=entry;
+  try{await buildAndDownloadPDF(entry);if(btn){btn.disabled=false;btn.textContent='✅';}}
+  catch(err){if(btn){btn.disabled=false;btn.textContent='❌';}alert('Erro ao gerar PDF.');}
+  S.entry=prev;
+}
+
+// ── DASHBOARD
+function renderGSBanner(){
+  const b=document.getElementById('gs-banner');
+  if(SHEETS_URL){
+    b.innerHTML=`<div class="config-banner"><div class="cb-icon">✅</div><div class="cb-body"><strong>Google Sheets conectado.</strong> Dados sincronizados automaticamente com a planilha.<br><a href="#" onclick="SHEETS_URL='';localStorage.removeItem('inspira_gs_url');renderGSBanner();return false;" style="color:var(--red);font-size:12px">Desconectar</a></div></div>`;
+  }else{
+    b.innerHTML=`<div class="config-banner"><div class="cb-icon">⚙️</div><div class="cb-body"><strong>Configure o Google Sheets para centralizar dados de todos os diretores do Brasil.</strong><br>Cole a URL do seu Apps Script após seguir o guia de configuração.<input id="gs-inp" placeholder="https://script.google.com/macros/s/.../exec"><button class="btn-save-cfg" onclick="saveGS()">Conectar</button></div></div>`;
+  }
+}
+function saveGS(){const u=document.getElementById('gs-inp').value.trim();if(!u.startsWith('https://script.google.com')){alert('URL inválida.');return;}SHEETS_URL=u;localStorage.setItem('inspira_gs_url',u);renderDash();}
+
+async function renderDash(){
+  document.getElementById('d-sub').textContent='Carregando...';
+  let data=null;
+  if(SHEETS_URL){const r=await sheetsGet('Pesquisa');if(r)data=r.slice(1).map(parseSR);}
+  if(!data)data=localSurveys;
+  document.getElementById('d-sub').textContent=`${data.length} resposta${data.length!==1?'s':''} · ${SHEETS_URL?'Google Sheets ✓':'armazenamento local'}`;
+  renderGSBanner();
+  const brands=new Set(data.map(d=>d.marca));
+  const unis=new Set(data.map(d=>d.unidade));
+  document.getElementById('d-kpis').innerHTML=[
+    {l:'Total de Respostas',v:data.length,u:'diretores',c:'gold'},
+    {l:'Marcas',v:brands.size,u:'representadas',c:'green'},
+    {l:'Unidades',v:unis.size,u:'representadas',c:'blue'},
+    {l:'Big Five',v:localBF.length,u:'perfis mapeados',c:'orange'}
+  ].map(k=>`<div class="kpi-card ${k.c}"><div class="kpi-label">${k.l}</div><div class="kpi-value">${k.v}</div><div class="kpi-unit">${k.u}</div></div>`).join('');
+  const marcas=[...brands].sort();
+  document.getElementById('d-filters').innerHTML=`<select class="filter-sel" id="f-marca" onchange="applyF()"><option value="">Todas as marcas</option>${marcas.map(m=>`<option>${m}</option>`).join('')}</select><select class="filter-sel" id="f-uni" onchange="applyF()"><option value="">Todas as unidades</option></select>`;
+  renderCharts(data);renderDTable(data);
+}
+function parseSR(r){return{ts:r[0],nome:r[1],email:r[2],marca:r[3],unidade:r[4],tempo:r[5],etapas:r[6]?r[6].split(', '):[],comp:{0:+r[7],1:+r[8],2:+r[9],3:+r[10],4:+r[11],5:+r[12]},desafios:r[13],tempo_cons:r[14],inseguranca:r[15],temas:r[16]?r[16].split(', '):[],formato:r[17],barreiras:r[18],expectativa:r[19]};}
+function applyF(){
+  const m=document.getElementById('f-marca')?.value||'',u=document.getElementById('f-uni')?.value||'';
+  if(m){const us=[...new Set(localSurveys.filter(d=>d.marca===m).map(d=>d.unidade).filter(Boolean))].sort();document.getElementById('f-uni').innerHTML=`<option value="">Todas as unidades</option>`+us.map(x=>`<option>${x}</option>`).join('');}
+  let d=localSurveys;if(m)d=d.filter(x=>x.marca===m);if(u)d=d.filter(x=>x.unidade===u);
+  renderCharts(d);renderDTable(d);
+}
+function renderCharts(data){
+  Object.values(S.charts).forEach(c=>{try{c.destroy();}catch(e){}});S.charts={};
+  const cnt=(arr,key)=>{const o={};arr.forEach(d=>{if(d[key])o[d[key]]=(o[d[key]]||0)+1;});return o;};
+  const tempo=cnt(data,'tempo'),cons=cnt(data,'tempo_cons'),inseg=cnt(data,'inseguranca'),bar=cnt(data,'barreiras'),temas={};
+  data.forEach(d=>(d.temas||[]).forEach(t=>{temas[t]=(temas[t]||0)+1;}));
+  const cSums=[0,0,0,0,0,0],cCts=[0,0,0,0,0,0];
+  data.forEach(d=>{if(d.comp)Object.entries(d.comp).forEach(([i,v])=>{cSums[i]+=+v;cCts[i]++;});});
+  const cAvg=cSums.map((s,i)=>cCts[i]?(s/cCts[i]).toFixed(1):0);
+  const cLbls=['Decisão Estratégica','Gestão por Dados','Liderança Pedagógica','Dev. Equipe','Comunicação','Gest. Operacional'];
+  const pains={};data.forEach(d=>{if(d.desafios)d.desafios.split(/[\s,;.]+/).forEach(w=>{w=w.toLowerCase().replace(/[^a-záéíóúâêîôûãõç]/g,'');if(w.length>4)pains[w]=(pains[w]||0)+1;});});
+  const C=['#2E5FA3','#C9A84C','#2A7D5F','#7B5EA7','#D4853A','#2BBCC4'];
+  const nav='#0B1628',def={responsive:true,plugins:{legend:{display:false},tooltip:{backgroundColor:nav}}};
+  if(!data.length){document.getElementById('d-charts').innerHTML=`<div class="chart-card full"><div class="empty-state"><div class="es-icon">📭</div><p>Sem respostas ainda.</p></div></div>`;return;}
+  document.getElementById('d-charts').innerHTML=`
+    <div class="chart-card"><div class="chart-title">Tempo de Atuação</div><div class="chart-sub">Experiência dos diretores</div><canvas id="ch-t" height="180"></canvas></div>
+    <div class="chart-card"><div class="chart-title">O Que Consome Mais Tempo</div><div class="chart-sub">Principal gargalo operacional</div><canvas id="ch-c" height="180"></canvas></div>
+    <div class="chart-card full"><div class="chart-title">Autoavaliação de Competências</div><div class="chart-sub">Média do grupo · Escala 1–5</div><canvas id="ch-cp" height="80"></canvas></div>
+    <div class="chart-card"><div class="chart-title">Maior Insegurança</div><div class="chart-sub">Área de maior vulnerabilidade</div><canvas id="ch-i" height="180"></canvas></div>
+    <div class="chart-card"><div class="chart-title">Barreiras ao Desenvolvimento</div><div class="chart-sub">O que impede o crescimento</div><canvas id="ch-b" height="180"></canvas></div>
+    <div class="chart-card full"><div class="chart-title">Temas Prioritários de Formação</div><div class="chart-sub">Escolhas mais frequentes</div><canvas id="ch-tm" height="80"></canvas></div>
+    <div class="chart-card full"><div class="chart-title">Nuvem de Dores</div><div class="chart-sub">Palavras mais frequentes nos desafios relatados</div><div style="display:flex;flex-wrap:wrap;gap:5px;padding:6px 0;min-height:70px;align-items:center">${Object.entries(pains).sort((a,b)=>b[1]-a[1]).slice(0,30).map(([w,c])=>`<span class="pain-tag${c>3?' size-lg':c>1?'':' size-sm'}">${w}<small style="opacity:.5;margin-left:4px">${c}</small></span>`).join('')||'<span style="color:var(--text-light);font-size:13px">Sem dados.</span>'}</div></div>`;
+  const mk=(id,type,lbls,vals,opt={})=>{const el=document.getElementById(id);if(!el||!lbls.length)return;S.charts[id]=new Chart(el,{type,data:{labels:lbls,datasets:[{data:vals,backgroundColor:C,borderRadius:5,borderWidth:0,...(opt.ds||{})}]},options:{...def,...(opt.op||{})}});};
+  if(Object.keys(tempo).length)mk('ch-t','doughnut',Object.keys(tempo),Object.values(tempo),{op:{plugins:{legend:{display:true,position:'bottom',labels:{boxWidth:9,font:{size:9}}}}}});
+  if(Object.keys(cons).length)mk('ch-c','bar',Object.keys(cons),Object.values(cons),{op:{indexAxis:'y',scales:{x:{grid:{display:false}},y:{grid:{display:false}}}}});
+  if(cAvg.some(v=>v>0))S.charts['ch-cp']=new Chart(document.getElementById('ch-cp'),{type:'bar',data:{labels:cLbls,datasets:[{data:cAvg,backgroundColor:C,borderRadius:5}]},options:{...def,scales:{y:{min:0,max:5,grid:{color:'rgba(0,0,0,0.05)'}},x:{grid:{display:false}}}}});
+  if(Object.keys(inseg).length)mk('ch-i','pie',Object.keys(inseg),Object.values(inseg),{op:{plugins:{legend:{display:true,position:'bottom',labels:{boxWidth:9,font:{size:9}}}}}});
+  if(Object.keys(bar).length)mk('ch-b','bar',Object.keys(bar),Object.values(bar),{op:{indexAxis:'y',scales:{x:{grid:{display:false}},y:{grid:{display:false}}}}});
+  if(Object.keys(temas).length){const ts=Object.entries(temas).sort((a,b)=>b[1]-a[1]);mk('ch-tm','bar',ts.map(t=>t[0]),ts.map(t=>t[1]),{op:{scales:{x:{grid:{display:false}},y:{grid:{color:'rgba(0,0,0,0.05)'}}}}});}
+}
+function renderDTable(data){
+  const t=document.getElementById('d-table');
+  if(!data.length){t.innerHTML='<thead><tr><th>Sem dados</th></tr></thead><tbody><tr><td style="text-align:center;padding:28px;color:var(--text-light)">Nenhuma resposta.</td></tr></tbody>';return;}
+  t.innerHTML=`<thead><tr><th>Nome</th><th>Marca</th><th>Unidade</th><th>Tempo</th><th>Insegurança</th><th>Data</th></tr></thead><tbody>${data.map(d=>`<tr><td><strong>${d.nome||'-'}</strong><br><span style="font-size:11px;color:var(--text-light)">${d.email||''}</span></td><td>${d.marca||'-'}</td><td>${d.unidade||'-'}</td><td>${d.tempo||'-'}</td><td>${d.inseguranca||'-'}</td><td>${d.ts?new Date(d.ts).toLocaleDateString('pt-BR'):'-'}</td></tr>`).join('')}</tbody>`;
+}
+
+// ── BIG FIVE DASHBOARD
+async function renderBFDash(){
+  let data=null;
+  if(SHEETS_URL){const r=await sheetsGet('BigFive');if(r)data=r.slice(1).map(parseBFR);}
+  if(!data)data=localBF;
+  const traits=['O','C','E','A','N'];
+  const avgs={};traits.forEach(t=>{const v=data.map(d=>d.scores?.[t]).filter(x=>x!=null);avgs[t]=v.length?Math.round(v.reduce((a,b)=>a+b,0)/v.length):0;});
+  const profs={};data.forEach(d=>{const p=d.profile?.title;if(p)profs[p]=(profs[p]||0)+1;});
+  const dominant=Object.entries(profs).sort((a,b)=>b[1]-a[1])[0]?.[0]?.split(' ').slice(1).join(' ')||'—';
+  const lowest=traits.map(t=>({t,a:avgs[t]})).sort((a,b)=>a.a-b.a)[0];
+  document.getElementById('bf-kpis').innerHTML=[
+    {l:'Diretores Avaliados',v:data.length,u:'Big Five concluídos',c:'gold'},
+    {l:'Perfil Dominante',v:data.length?dominant:'—',u:'mais frequente',c:'blue'},
+    {l:'Maior Gap',v:data.length?(BFI[lowest.t]?.name||'—'):'—',u:'dimensão mais baixa',c:'orange'},
+    {l:'PDFs Disponíveis',v:data.length,u:'para download',c:'green'}
+  ].map(k=>`<div class="kpi-card ${k.c}"><div class="kpi-label">${k.l}</div><div class="kpi-value">${k.v}</div><div class="kpi-unit">${k.u}</div></div>`).join('');
+  const marcas=[...new Set(data.map(d=>d.marca).filter(Boolean))].sort();
+  document.getElementById('bf-filters').innerHTML=`<select class="filter-sel" id="bf-f-marca" onchange="applyBFF()"><option value="">Todas as marcas</option>${marcas.map(m=>`<option>${m}</option>`).join('')}</select>`;
+  if(!data.length){document.getElementById('bf-charts').innerHTML=`<div class="chart-card full"><div class="empty-state"><div class="es-icon">🧠</div><p>Nenhum Big Five concluído ainda.</p></div></div>`;return;}
+  renderBFCharts(data);renderBFTable(data);
+}
+function parseBFR(r){return{ts:r[0],nome:r[1],email:r[2],marca:r[3],unidade:r[4],profile:{title:r[5]},scores:{O:+r[6],C:+r[7],E:+r[8],A:+r[9],N:+r[10]}};}
+function applyBFF(){const m=document.getElementById('bf-f-marca')?.value||'';let d=localBF;if(m)d=d.filter(x=>x.marca===m);renderBFCharts(d);renderBFTable(d);}
+function renderBFCharts(data){
+  Object.values(S.charts).forEach(c=>{try{c.destroy();}catch(e){}});S.charts={};
+  const traits=['O','C','E','A','N'];
+  const avgs={};traits.forEach(t=>{const v=data.map(d=>d.scores?.[t]).filter(x=>x!=null);avgs[t]=v.length?Math.round(v.reduce((a,b)=>a+b,0)/v.length):0;});
+  const profs={};data.forEach(d=>{const p=d.profile?.title;if(p)profs[p]=(profs[p]||0)+1;});
+  const TC=['#7B5EA7','#2A7D5F','#2E5FA3','#C9A84C','#C0392B'];
+  const nav='#0B1628',def={responsive:true,plugins:{legend:{display:false},tooltip:{backgroundColor:nav}}};
+  document.getElementById('bf-charts').innerHTML=`
+    <div class="chart-card full"><div class="chart-title">Média do Grupo por Dimensão Big Five</div><div class="chart-sub">Percentual médio (0–100) por traço</div><canvas id="bfc-avg" height="70"></canvas></div>
+    <div class="chart-card"><div class="chart-title">Distribuição de Perfis</div><div class="chart-sub">Perfil dominante de cada diretor</div><canvas id="bfc-prof" height="200"></canvas></div>
+    <div class="chart-card"><div class="chart-title">Radar Coletivo</div><div class="chart-sub">Visão sintética das 5 dimensões</div><div class="radar-wrap"><canvas id="bfc-radar"></canvas></div></div>`;
+  S.charts.avg=new Chart(document.getElementById('bfc-avg'),{type:'bar',data:{labels:traits.map(t=>BFI[t].name),datasets:[{data:traits.map(t=>avgs[t]),backgroundColor:TC,borderRadius:7}]},options:{...def,scales:{y:{min:0,max:100,grid:{color:'rgba(0,0,0,0.05)'}},x:{grid:{display:false}}}}});
+  if(Object.keys(profs).length)S.charts.prof=new Chart(document.getElementById('bfc-prof'),{type:'doughnut',data:{labels:Object.keys(profs),datasets:[{data:Object.values(profs),backgroundColor:TC,borderWidth:0}]},options:{...def,plugins:{...def.plugins,legend:{display:true,position:'bottom',labels:{boxWidth:9,font:{size:9}}}}}});
+  S.charts.radar=new Chart(document.getElementById('bfc-radar'),{type:'radar',data:{labels:traits.map(t=>BFI[t].name),datasets:[{data:traits.map(t=>avgs[t]),backgroundColor:'rgba(201,168,76,0.15)',borderColor:'#C9A84C',pointBackgroundColor:'#C9A84C',borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{r:{min:0,max:100,ticks:{display:false},grid:{color:'rgba(0,0,0,0.07)'},pointLabels:{font:{size:10}}}}}});
+}
+function renderBFTable(data){
+  const t=document.getElementById('bf-table');
+  if(!data.length){t.innerHTML='<thead><tr><th>Sem dados</th></tr></thead><tbody><tr><td style="text-align:center;padding:28px;color:var(--text-light)">Sem resultados.</td></tr></tbody>';return;}
+  const bdg=v=>`<span class="badge ${v>=70?'high':v>=45?'mid':'low'}">${v}%</span>`;
+  t.innerHTML=`<thead><tr><th>Nome</th><th>Marca/Unidade</th><th>Perfil</th><th>Abertura</th><th>Conscien.</th><th>Extroversão</th><th>Amabilidade</th><th>Est. Emocional</th><th>PDF</th></tr></thead><tbody>${data.map((d,i)=>`<tr><td><strong>${d.nome||'-'}</strong></td><td>${d.marca||'-'}<br><span style="font-size:11px;color:var(--text-light)">${d.unidade||''}</span></td><td style="font-size:12px;font-weight:600">${d.profile?.title||'-'}</td><td>${bdg(d.scores?.O||0)}</td><td>${bdg(d.scores?.C||0)}</td><td>${bdg(d.scores?.E||0)}</td><td>${bdg(d.scores?.A||0)}</td><td>${bdg(d.scores?.N||0)}</td><td><button class="btn-pdf-sm" data-pdf="${i}" onclick="downloadPDFFor(${i})">📄 PDF</button></td></tr>`).join('')}</tbody>`;
+}
+
+// INIT
+selectOpt('survey');
+</script>
+</body>
+</html>
