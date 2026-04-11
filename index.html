@@ -616,7 +616,6 @@ function renderMPQ(){
     return '<div class="mp-btn'+(sv==v?' selected':'')+'" data-qid="'+q.id+'" data-val="'+v+'" onclick="selMPEl(this)"><span class="mp-num">'+v+'</span><span class="mp-lbl">'+lbls[i]+'</span></div>';
   }).join('');
   document.getElementById('mp-qa').innerHTML=
-    '<div class="mp-dimension" style="background:'+dim.bg+';color:'+dim.color+'">'+dim.name+'</div>'+
     '<div class="mp-question">'+q.q+'</div>'+
     '<div class="mp-sub">Quanto esta afirmação descreve você no dia a dia?</div>'+
     '<div class="mp-scale">'+btns+'</div>'+
@@ -640,7 +639,7 @@ function mpNav(d){
 }
 
 function calcMP(){
-  const sums={V:[],P:[],G:[],R:[],I:[]};
+  const sums={O:[],C:[],E:[],A:[],N:[]};
   MPQ.forEach(q=>{let v=S.mpans[q.id]||3;if(q.r)v=6-v;sums[q.d].push(v);});
   const res={};
   Object.entries(sums).forEach(([d,vals])=>{res[d]=Math.round(vals.reduce((a,b)=>a+b,0)/vals.length*20);});
@@ -963,7 +962,7 @@ async function renderMPDash(){
   let data=null;
   if(SHEETS_URL){const r=await sheetsGet('MapeamentoPerfil');if(r)data=r.slice(1).map(parseMPR);}
   if(!data)data=localMP;
-  const dims=['V','P','G','R','I'];
+  const dims=['O','C','E','A','N'];
   const avgs={};dims.forEach(d=>{const v=data.map(x=>x.scores?.[d]).filter(x=>x!=null);avgs[d]=v.length?Math.round(v.reduce((a,b)=>a+b,0)/v.length):0;});
   const profs={};data.forEach(d=>{const p=d.profile?.title;if(p)profs[p]=(profs[p]||0)+1;});
   const dominant=Object.entries(profs).sort((a,b)=>b[1]-a[1])[0]?.[0]?.split(' ').slice(1).join(' ')||'—';
@@ -979,11 +978,11 @@ async function renderMPDash(){
   if(!data.length){document.getElementById('mp-charts').innerHTML='<div class="chart-card full"><div class="empty-state"><div class="es-icon">🎯</div><p>Nenhum mapeamento concluído ainda.</p></div></div>';renderMPTable(data);return;}
   renderMPCharts(data);renderMPTable(data);
 }
-function parseMPR(r){return{ts:r[0],nome:r[1],email:r[2],marca:r[3],unidade:r[4],profile:{title:r[5]},scores:{V:+r[6],P:+r[7],G:+r[8],R:+r[9],I:+r[10]}};}
+function parseMPR(r){return{ts:r[0],nome:r[1],email:r[2],marca:r[3],unidade:r[4],profile:{title:r[5]},scores:{O:+r[6],C:+r[7],E:+r[8],A:+r[9],N:+r[10]}};}
 function applyMPF(){const m=document.getElementById('mp-f-marca')?.value||'';let d=localMP;if(m)d=d.filter(x=>x.marca===m);renderMPCharts(d);renderMPTable(d);}
 function renderMPCharts(data){
   Object.values(S.charts).forEach(c=>{try{c.destroy();}catch(e){}});S.charts={};
-  const dims=['V','P','G','R','I'];
+  const dims=['O','C','E','A','N'];
   const avgs={};dims.forEach(d=>{const v=data.map(x=>x.scores?.[d]).filter(x=>x!=null);avgs[d]=v.length?Math.round(v.reduce((a,b)=>a+b,0)/v.length):0;});
   const profs={};data.forEach(d=>{const p=d.profile?.title;if(p)profs[p]=(profs[p]||0)+1;});
   const TC=['#1E3A8A','#14B8A6','#A78BFA','#F59E0B','#06B6D4'];
@@ -1000,7 +999,7 @@ function renderMPTable(data){
   const t=document.getElementById('mp-table');
   if(!data.length){t.innerHTML='<thead><tr><th>Sem dados</th></tr></thead><tbody><tr><td style="text-align:center;padding:24px;color:var(--text-light)">Sem resultados ainda.</td></tr></tbody>';return;}
   const bdg=v=>'<span class="badge '+(v>=70?'high':v>=45?'mid':'low')+'">'+v+'%</span>';
-  t.innerHTML='<thead><tr><th>Nome</th><th>Marca/Unidade</th><th>Perfil</th><th>Visão</th><th>Pedagógico</th><th>Pessoas</th><th>Resiliência</th><th>Inovação</th><th>PDF</th></tr></thead><tbody>'+data.map((d,i)=>'<tr><td><strong>'+(d.nome||'-')+'</strong></td><td>'+(d.marca||'-')+'<br><span style="font-size:11px;color:var(--text-light)">'+(d.unidade||'')+'</span></td><td style="font-size:12px;font-weight:600">'+(d.profile?.title||'-')+'</td><td>'+bdg(d.scores?.V||0)+'</td><td>'+bdg(d.scores?.P||0)+'</td><td>'+bdg(d.scores?.G||0)+'</td><td>'+bdg(d.scores?.R||0)+'</td><td>'+bdg(d.scores?.I||0)+'</td><td><button class="btn-pdf-sm" data-pdf="'+i+'" onclick="downloadPDFFor('+i+')">📄 PDF</button></td></tr>').join('')+'</tbody>';
+  t.innerHTML='<thead><tr><th>Nome</th><th>Marca/Unidade</th><th>Perfil</th><th>Abertura</th><th>Conscien.</th><th>Extroversão</th><th>Amabilidade</th><th>Est. Emocional</th><th>PDF</th></tr></thead><tbody>'+data.map((d,i)=>'<tr><td><strong>'+(d.nome||'-')+'</strong></td><td>'+(d.marca||'-')+'<br><span style="font-size:11px;color:var(--text-light)">'+(d.unidade||'')+'</span></td><td style="font-size:12px;font-weight:600">'+(d.profile?.title||'-')+'</td><td>'+bdg(d.scores?.O||0)+'</td><td>'+bdg(d.scores?.C||0)+'</td><td>'+bdg(d.scores?.E||0)+'</td><td>'+bdg(d.scores?.A||0)+'</td><td>'+bdg(d.scores?.N||0)+'</td><td><button class="btn-pdf-sm" data-pdf="'+i+'" onclick="downloadPDFFor('+i+')">📄 PDF</button></td></tr>').join('')+'</tbody>';
 }
 
 // INIT
