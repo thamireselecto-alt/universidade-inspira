@@ -669,207 +669,211 @@ async function downloadPDF(){
 function buildPDF(e){
   return new Promise((resolve,reject)=>{
     try{
-      if(!window.jspdf){reject(new Error('jsPDF não carregado'));return;}
+      if(!window.jspdf){reject(new Error('jsPDF nao carregado'));return;}
       const {jsPDF}=window.jspdf;
       const doc=new jsPDF({orientation:'portrait',unit:'pt',format:'a4'});
       const W=595.28,H=841.89;
-      const NAVY=[30,58,138],TEAL=[20,184,166],CREAM=[255,251,235],WHITE=[255,255,255],GRAY=[241,245,249];
-      const DCOLS={O:[124,58,237],C:[20,184,166],E:[30,58,138],A:[245,158,11],N:[6,182,212]};
-      const dims=['O','C','E','A','N'];
       const sc=e.scores||{};
-      const sorted=dims.map(d=>({d,s:sc[d]||0,info:DIM[d]})).sort((a,b)=>b.s-a.s);
+      const dims=['O','C','E','A','N'];
       const recs=getRecs(sc);
+      const sorted=dims.map(d=>({d,s:sc[d]||0,info:DIM[d]})).sort((a,b)=>b.s-a.s);
       const dt=new Date(e.ts||Date.now()).toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
+      const DCOLS={O:[124,58,237],C:[20,184,166],E:[30,58,138],A:[245,158,11],N:[6,182,212]};
 
-      // helper: rounded bar
-      function bar(x,y,w,h,pct,col){
-        doc.setFillColor(220,228,240);doc.roundedRect(x,y,w,h,h/2,h/2,'F');
-        if(pct>0){doc.setFillColor(...col);doc.roundedRect(x,y,w*(pct/100),h,h/2,h/2,'F');}
-      }
+      // ── HEADER
+      doc.setFillColor(30,58,138);
+      doc.rect(0,0,W,140,'F');
+      doc.setFillColor(20,184,166);
+      doc.rect(0,0,6,140,'F');
 
-      // ════════════════════════════════════
-      // PAGE 1 — CAPA + PERFIL + SCORES
-      // ════════════════════════════════════
-      // Header block
-      doc.setFillColor(...NAVY);doc.rect(0,0,W,180,'F');
-      doc.setFillColor(...TEAL);doc.rect(0,0,6,180,'F');
+      doc.setFontSize(9);doc.setFont('helvetica','normal');doc.setTextColor(160,200,230);
+      doc.text('Universidade',22,28);
+      doc.setFontSize(24);doc.setFont('helvetica','bold');doc.setTextColor(255,255,255);
+      doc.text('Inspira',22,52);
 
-      // Logo text
-      doc.setFontSize(10);doc.setFont('helvetica','normal');doc.setTextColor(180,210,230);
-      doc.text('Universidade',22,32);
-      doc.setFontSize(26);doc.setFont('helvetica','bold');doc.setTextColor(...WHITE);
-      doc.text('Inspira',22,58);
-      // Arcs decoration
-      doc.setDrawColor(...TEAL);doc.setLineWidth(2);
-      doc.lines([[30,20,60,0,90,-20]],200,36,null,false);
-      doc.setDrawColor(167,139,250);doc.setLineWidth(1.5);
-      doc.lines([[30,22,60,2,90,-20]],203,30,null,false);
-
-      // Person info - right side of header
-      doc.setFontSize(9);doc.setFont('helvetica','bold');doc.setTextColor(...TEAL);
-      doc.text('MAPEAMENTO DE PERFIL DE LIDERANÇA · 2025',22,90);
-      doc.setFontSize(18);doc.setFont('helvetica','bold');doc.setTextColor(...WHITE);
-      doc.text(e.nome||'Diretor(a)',22,114,{maxWidth:W-44});
-      doc.setFontSize(10);doc.setFont('helvetica','normal');doc.setTextColor(160,190,220);
-      doc.text((e.marca||'')+(e.unidade?' · '+e.unidade:''),22,132);
-      doc.setFontSize(8);doc.setTextColor(110,145,190);doc.text(dt,22,148);
+      doc.setFontSize(8);doc.setFont('helvetica','bold');doc.setTextColor(20,184,166);
+      doc.text('MAPEAMENTO DE PERFIL DE LIDERANCA - 2025',22,80);
+      doc.setFontSize(16);doc.setFont('helvetica','bold');doc.setTextColor(255,255,255);
+      doc.text(e.nome||'',22,100,{maxWidth:W-44});
+      doc.setFontSize(9);doc.setFont('helvetica','normal');doc.setTextColor(150,185,220);
+      doc.text((e.marca||'')+(e.unidade?' - '+e.unidade:''),22,116);
+      doc.setFontSize(8);doc.setTextColor(100,140,190);
+      doc.text(dt,22,130);
 
       // Profile badge
-      doc.setFillColor(20,184,166);doc.roundedRect(22,162,180,14,4,4,'F');
-      doc.setFontSize(8);doc.setFont('helvetica','bold');doc.setTextColor(...WHITE);
-      doc.text((e.profile&&e.profile.title)||'',112,172,{align:'center'});
+      doc.setFillColor(20,184,166);
+      doc.roundedRect(22,148,200,16,4,4,'F');
+      doc.setFontSize(8);doc.setFont('helvetica','bold');doc.setTextColor(255,255,255);
+      doc.text((e.profile&&e.profile.title)||'',122,159,{align:'center'});
 
-      // ── SCORES SECTION
-      let y=198;
-      doc.setFontSize(13);doc.setFont('helvetica','bold');doc.setTextColor(...NAVY);
-      doc.text('Resultados por Dimensão',22,y);
-      doc.setDrawColor(...TEAL);doc.setLineWidth(1);doc.line(22,y+4,160,y+4);
-      y+=18;
+      // ── SCORES
+      let y=182;
+      doc.setFontSize(12);doc.setFont('helvetica','bold');doc.setTextColor(30,58,138);
+      doc.text('Resultados por Dimensao',22,y);
+      doc.setDrawColor(20,184,166);doc.setLineWidth(1);doc.line(22,y+4,180,y+4);
+      y+=16;
 
       dims.forEach(d=>{
         const info=DIM[d],s=sc[d]||0,col=DCOLS[d];
-        const lvl=s>=70?'Alto':s>=45?'Médio':'A Desenvolver';
-        const lvlBg=s>=70?[204,250,245]:s>=45?[254,243,199]:[255,220,240];
-        const lvlTx=s>=70?[14,116,110]:s>=45?[146,64,14]:[157,23,77];
-
-        doc.setFillColor(248,250,252);doc.roundedRect(22,y,W-44,38,5,5,'F');
-        doc.setFillColor(...col);doc.roundedRect(22,y,5,38,2,2,'F');
-
+        const lvl=s>=70?'Alto':s>=45?'Medio':'A Desenvolver';
+        doc.setFillColor(248,250,252);
+        doc.roundedRect(22,y,W-44,40,4,4,'F');
+        doc.setFillColor(...col);
+        doc.roundedRect(22,y,5,40,2,2,'F');
         // Name
-        doc.setFontSize(9.5);doc.setFont('helvetica','bold');doc.setTextColor(...NAVY);
-        doc.text(info.name,34,y+13);
-
-        // Level pill
-        doc.setFillColor(...lvlBg);doc.roundedRect(W-100,y+4,52,12,4,4,'F');
-        doc.setFontSize(7);doc.setFont('helvetica','bold');doc.setTextColor(...lvlTx);
-        doc.text(lvl,W-74,y+13,{align:'center'});
-
-        // Score %
-        doc.setFontSize(13);doc.setFont('helvetica','bold');doc.setTextColor(...NAVY);
-        doc.text(s+'%',W-26,y+14,{align:'right'});
-
-        // Bar
-        bar(34,y+20,W-78,6,s,col);
-
-        // Desc
+        doc.setFontSize(9);doc.setFont('helvetica','bold');doc.setTextColor(30,58,138);
+        doc.text(info.name,32,y+13);
+        // Level
         doc.setFontSize(7);doc.setFont('helvetica','normal');doc.setTextColor(100,120,150);
-        doc.text(info.desc,34,y+34,{maxWidth:W-80});
-        y+=46;
+        doc.text(lvl,32,y+24);
+        // Score
+        doc.setFontSize(14);doc.setFont('helvetica','bold');doc.setTextColor(30,58,138);
+        doc.text(s+'%',W-26,y+16,{align:'right'});
+        // Bar background
+        doc.setFillColor(215,225,240);
+        doc.roundedRect(32,y+28,W-70,6,3,3,'F');
+        // Bar fill
+        const bw=Math.max(0,(W-70)*(s/100));
+        if(bw>0){doc.setFillColor(...col);doc.roundedRect(32,y+28,bw,6,3,3,'F');}
+        y+=48;
       });
 
       // ── PROFILE DESCRIPTION
-      y+=6;
-      doc.setFillColor(235,245,255);doc.roundedRect(22,y,W-44,70,6,6,'F');
-      doc.setFillColor(...TEAL);doc.roundedRect(22,y,5,70,2,2,'F');
-      doc.setFontSize(9);doc.setFont('helvetica','bold');doc.setTextColor(...NAVY);
-      doc.text('Perfil Dominante: '+((e.profile&&e.profile.title)||''),34,y+14);
-      doc.setFontSize(8.5);doc.setFont('helvetica','normal');doc.setTextColor(50,70,110);
-      const profLines=doc.splitTextToSize((e.profile&&e.profile.desc)||'',W-60);
-      doc.text(profLines.slice(0,4),34,y+28);
-      y+=78;
+      y+=4;
+      doc.setFillColor(235,245,255);
+      doc.roundedRect(22,y,W-44,64,5,5,'F');
+      doc.setFillColor(20,184,166);
+      doc.roundedRect(22,y,5,64,2,2,'F');
+      doc.setFontSize(9);doc.setFont('helvetica','bold');doc.setTextColor(30,58,138);
+      doc.text('Perfil: '+((e.profile&&e.profile.title)||''),32,y+14);
+      doc.setFontSize(8);doc.setFont('helvetica','normal');doc.setTextColor(50,70,110);
+      const profLines=doc.splitTextToSize((e.profile&&e.profile.desc)||'',W-56);
+      doc.text(profLines.slice(0,4),32,y+27);
+      y+=72;
 
-      // ── STRENGTHS + ATTENTION (2 columns)
-      doc.setFontSize(11);doc.setFont('helvetica','bold');doc.setTextColor(...NAVY);
+      // ── STRENGTHS + ATTENTION
+      y+=4;
+      const colW=(W-52)/2;
+      doc.setFontSize(10);doc.setFont('helvetica','bold');doc.setTextColor(30,58,138);
       doc.text('Pontos Fortes',22,y);
       doc.text('A Desenvolver',W/2+4,y);
-      doc.setDrawColor(...TEAL);doc.line(22,y+3,W/2-4,y+3);
+      doc.setDrawColor(20,184,166);doc.setLineWidth(0.8);doc.line(22,y+3,W/2-4,y+3);
       doc.setDrawColor(245,158,11);doc.line(W/2+4,y+3,W-22,y+3);
       y+=12;
 
-      const top2=sorted.slice(0,2);
-      const bot2=sorted.slice(3);
-      const colW=(W-52)/2;
-
-      top2.forEach((it,i)=>{
+      sorted.slice(0,2).forEach((it,i)=>{
         const col=DCOLS[it.d];
-        doc.setFillColor(248,252,250);doc.roundedRect(22,y+i*34,colW,30,4,4,'F');
-        doc.setFillColor(...col);doc.roundedRect(22,y+i*34,4,30,2,2,'F');
-        doc.setFontSize(9);doc.setFont('helvetica','bold');doc.setTextColor(...NAVY);
-        doc.text(it.info.name+' ('+it.s+'%)',30,y+i*34+11);
+        doc.setFillColor(248,252,250);
+        doc.roundedRect(22,y+i*36,colW,32,3,3,'F');
+        doc.setFillColor(...col);
+        doc.roundedRect(22,y+i*36,4,32,2,2,'F');
+        doc.setFontSize(8);doc.setFont('helvetica','bold');doc.setTextColor(30,58,138);
+        doc.text(it.info.name+' ('+it.s+'%)',30,y+i*36+11);
         doc.setFontSize(7);doc.setFont('helvetica','normal');doc.setTextColor(80,100,130);
-        const dl=doc.splitTextToSize(it.info.desc,colW-14);
-        doc.text(dl[0]||'',30,y+i*34+22);
+        const dl=doc.splitTextToSize(it.info.desc,colW-16);
+        doc.text(dl[0]||'',30,y+i*36+22);
       });
 
-      bot2.forEach((it,i)=>{
+      sorted.slice(3).forEach((it,i)=>{
         if(i>1)return;
         const col=DCOLS[it.d];
-        doc.setFillColor(255,252,245);doc.roundedRect(W/2+4,y+i*34,colW,30,4,4,'F');
-        doc.setFillColor(...col);doc.roundedRect(W/2+4,y+i*34,4,30,2,2,'F');
-        doc.setFontSize(9);doc.setFont('helvetica','bold');doc.setTextColor(...NAVY);
-        doc.text(it.info.name+' ('+it.s+'%)',W/2+12,y+i*34+11);
+        doc.setFillColor(255,252,245);
+        doc.roundedRect(W/2+4,y+i*36,colW,32,3,3,'F');
+        doc.setFillColor(...col);
+        doc.roundedRect(W/2+4,y+i*36,4,32,2,2,'F');
+        doc.setFontSize(8);doc.setFont('helvetica','bold');doc.setTextColor(30,58,138);
+        doc.text(it.info.name+' ('+it.s+'%)',W/2+12,y+i*36+11);
         doc.setFontSize(7);doc.setFont('helvetica','normal');doc.setTextColor(80,100,130);
-        const dl=doc.splitTextToSize(it.info.desc,colW-14);
-        doc.text(dl[0]||'',W/2+12,y+i*34+22);
+        const dl=doc.splitTextToSize(it.info.desc,colW-16);
+        doc.text(dl[0]||'',W/2+12,y+i*36+22);
       });
-      y+=78;
+      y+=80;
 
-      // ── RADAR CHART (drawn with lines)
-      if(y<H-180){
-        doc.setFontSize(11);doc.setFont('helvetica','bold');doc.setTextColor(...NAVY);
-        doc.text('Radar de Perfil',22,y);
-        doc.setDrawColor(...TEAL);doc.line(22,y+3,120,y+3);
-        y+=14;
-        const cx=110,cy=y+70,R=60;
-        const angles=dims.map((_,i)=>(-Math.PI/2)+(2*Math.PI*i/5));
-        // Grid rings
-        [0.25,0.5,0.75,1].forEach(pct=>{
-          doc.setDrawColor(200,210,225);doc.setLineWidth(0.5);
-          const pts=angles.map(a=>[cx+R*pct*Math.cos(a),cy+R*pct*Math.sin(a)]);
-          for(let i=0;i<pts.length;i++){
-            const nx=(i+1)%pts.length;
-            doc.line(pts[i][0],pts[i][1],pts[nx][0],pts[nx][1]);
-          }
-        });
-        // Spokes
-        angles.forEach(a=>{doc.setDrawColor(200,210,225);doc.line(cx,cy,cx+R*Math.cos(a),cy+R*Math.sin(a));});
-        // Data polygon
-        const dataPts=dims.map((d,i)=>{
-          const pct=(sc[d]||0)/100;
-          return [cx+R*pct*Math.cos(angles[i]),cy+R*pct*Math.sin(angles[i])];
-        });
-        doc.setFillColor(20,184,166);doc.setGState&&doc.setGState(new doc.GState({opacity:0.15}));
-        // Fill polygon
-        doc.setDrawColor(...TEAL);doc.setLineWidth(2);
-        for(let i=0;i<dataPts.length;i++){
-          const nx=(i+1)%dataPts.length;
-          doc.line(dataPts[i][0],dataPts[i][1],dataPts[nx][0],dataPts[nx][1]);
+      // ── RADAR (simple polygon, no GState)
+      y+=6;
+      doc.setFontSize(10);doc.setFont('helvetica','bold');doc.setTextColor(30,58,138);
+      doc.text('Radar de Perfil',22,y);
+      doc.setDrawColor(20,184,166);doc.setLineWidth(0.8);doc.line(22,y+3,116,y+3);
+      y+=14;
+
+      const cx=120,cy=y+72,R=58;
+      const angles=dims.map((_,i)=>(-Math.PI/2)+(2*Math.PI*i/5));
+
+      // Grid rings
+      doc.setLineWidth(0.4);
+      [0.33,0.66,1].forEach(pct=>{
+        doc.setDrawColor(200,215,235);
+        const pts=angles.map(a=>[cx+R*pct*Math.cos(a),cy+R*pct*Math.sin(a)]);
+        for(let i=0;i<pts.length;i++){
+          const n=(i+1)%pts.length;
+          doc.line(pts[i][0],pts[i][1],pts[n][0],pts[n][1]);
         }
-        try{doc.setGState(new doc.GState({opacity:1}));}catch(e){}
-        // Points
-        dataPts.forEach((p,i)=>{
-          doc.setFillColor(...DCOLS[dims[i]]);
-          doc.circle(p[0],p[1],3,'F');
-        });
-        // Labels
-        dims.forEach((d,i)=>{
-          const lx=cx+(R+18)*Math.cos(angles[i]);
-          const ly=cy+(R+18)*Math.sin(angles[i]);
-          doc.setFontSize(7.5);doc.setFont('helvetica','bold');doc.setTextColor(...NAVY);
-          doc.text(DIM[d].name,lx,ly,{align:'center'});
-        });
-        y=cy+R+30;
+      });
+
+      // Spokes
+      angles.forEach(a=>{
+        doc.setDrawColor(200,215,235);doc.setLineWidth(0.4);
+        doc.line(cx,cy,cx+R*Math.cos(a),cy+R*Math.sin(a));
+      });
+
+      // Data polygon
+      const dataPts=dims.map((d,i)=>{
+        const pct=(sc[d]||0)/100;
+        return [cx+R*pct*Math.cos(angles[i]),cy+R*pct*Math.sin(angles[i])];
+      });
+
+      doc.setDrawColor(20,184,166);doc.setLineWidth(2);
+      for(let i=0;i<dataPts.length;i++){
+        const n=(i+1)%dataPts.length;
+        doc.line(dataPts[i][0],dataPts[i][1],dataPts[n][0],dataPts[n][1]);
       }
 
-      // ── RECOMMENDATIONS
-      y+=8;
-      doc.setFillColor(204,250,245);doc.roundedRect(22,y,W-44,Math.min(80,H-y-30),6,6,'F');
-      doc.setFontSize(10);doc.setFont('helvetica','bold');doc.setTextColor(...NAVY);
-      doc.text('Recomendações de Desenvolvimento',34,y+14);
-      doc.setFontSize(8);doc.setFont('helvetica','normal');doc.setTextColor(20,80,70);
-      recs.forEach((r,i)=>{
-        const rl=doc.splitTextToSize((i+1)+'. '+r,W-70);
-        doc.text(rl[0],34,y+28+i*16);
+      // Data points
+      dims.forEach((d,i)=>{
+        const col=DCOLS[d];
+        doc.setFillColor(...col);
+        doc.circle(dataPts[i][0],dataPts[i][1],3,'F');
       });
 
-      // Footer
-      doc.setFontSize(7);doc.setTextColor(140,160,190);
-      doc.text('Mapeamento de Perfil de Liderança · Universidade Inspira © 2025 · Documento confidencial',22,H-10);
-      doc.text('1 / 1',W-22,H-10,{align:'right'});
+      // Labels
+      dims.forEach((d,i)=>{
+        const lx=cx+(R+22)*Math.cos(angles[i]);
+        const ly=cy+(R+22)*Math.sin(angles[i]);
+        doc.setFontSize(7);doc.setFont('helvetica','bold');doc.setTextColor(30,58,138);
+        const name=DIM[d].name;
+        doc.text(name,lx,ly,{align:'center',maxWidth:60});
+      });
 
-      doc.save('Perfil_Lideranca_'+(e.nome||'Diretor').replace(/ /g,'_')+'.pdf');
+      // Score labels on points
+      dims.forEach((d,i)=>{
+        doc.setFontSize(7);doc.setFont('helvetica','bold');doc.setTextColor(30,58,138);
+        doc.text((sc[d]||0)+'%',dataPts[i][0],dataPts[i][1]-6,{align:'center'});
+      });
+
+      y=cy+R+36;
+
+      // ── RECOMMENDATIONS
+      doc.setFillColor(204,250,245);
+      doc.roundedRect(22,y,W-44,72,5,5,'F');
+      doc.setFontSize(9);doc.setFont('helvetica','bold');doc.setTextColor(30,58,138);
+      doc.text('Recomendacoes de Desenvolvimento',32,y+14);
+      doc.setFontSize(8);doc.setFont('helvetica','normal');doc.setTextColor(10,70,60);
+      recs.forEach((r,i)=>{
+        const rl=doc.splitTextToSize((i+1)+'. '+r,W-66);
+        doc.text(rl[0],32,y+28+i*16);
+      });
+
+      // ── FOOTER
+      doc.setFontSize(7);doc.setTextColor(140,160,190);
+      doc.text('Mapeamento de Perfil de Lideranca - Universidade Inspira 2025 - Documento confidencial',22,H-12);
+      doc.text('1/1',W-22,H-12,{align:'right'});
+
+      doc.save('Perfil_'+(e.nome||'Diretor').replace(/ /g,'_')+'.pdf');
       resolve();
-    }catch(err){reject(err);}
+    }catch(err){
+      console.error('PDF error:',err);
+      reject(err);
+    }
   });
 }
 
