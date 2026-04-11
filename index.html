@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Universidade Inspira</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"><\/script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 :root{--navy:#0B1628;--navy-mid:#162240;--gold:#C9A84C;--gold-light:#E8C97A;--gold-pale:#F5E6C0;--cream:#FAF7F2;--text:#0B1628;--text-mid:#3D4F6E;--text-light:#7A8BA8;--border:rgba(11,22,40,0.1);--green:#2A7D5F;--red:#C0392B;--orange:#D4853A}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -47,7 +48,7 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--text);
 .field input,.field select,.field textarea{width:100%;padding:12px 15px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;color:var(--text);background:#fff;transition:border-color .2s;font-family:inherit;appearance:none}
 .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,168,76,.1)}
 .field textarea{resize:vertical;min-height:90px}
-.field select{background-image:url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'12\' height=\'12\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%237A8BA8\' stroke-width=\'2\'%3E%3Cpath d=\'m6 9 6 6 6-6\'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 13px center;padding-right:36px}
+.field select{background-image:url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2712%27 height=%2712%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27%237A8BA8%27 stroke-width=%272%27%3E%3Cpath d=%27m6 9 6 6 6-6%27/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 13px center;padding-right:36px}
 .options-grid{display:grid;gap:9px}.options-grid.col2{grid-template-columns:1fr 1fr}
 .option-item{display:flex;align-items:center;gap:11px;padding:12px 15px;border:1.5px solid var(--border);border-radius:10px;cursor:pointer;background:#fff;transition:all .15s;font-size:14px;color:var(--text-mid)}
 .option-item:hover,.option-item.selected{border-color:var(--gold);background:var(--gold-pale)}
@@ -128,7 +129,7 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--text);
 .chart-title{font-family:"Syne",sans-serif;font-size:13px;font-weight:700;color:var(--navy);margin-bottom:3px}
 .chart-sub{font-size:11px;color:var(--text-light);margin-bottom:18px}
 .filter-bar{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap}
-.filter-sel{padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;color:var(--text);background:#fff;appearance:none;cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'12\' height=\'12\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%237A8BA8\' stroke-width=\'2\'%3E%3Cpath d=\'m6 9 6 6 6-6\'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 9px center;padding-right:28px;font-family:inherit}
+.filter-sel{padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;color:var(--text);background:#fff;appearance:none;cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2712%27 height=%2712%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27%237A8BA8%27 stroke-width=%272%27%3E%3Cpath d=%27m6 9 6 6 6-6%27/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 9px center;padding-right:28px;font-family:inherit}
 .filter-sel:focus{outline:none;border-color:var(--gold)}
 .responses-table{width:100%;border-collapse:separate;border-spacing:0 5px}
 .responses-table th{font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--text-light);padding:0 11px 7px;text-align:left}
