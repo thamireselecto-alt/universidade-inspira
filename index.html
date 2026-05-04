@@ -414,27 +414,12 @@ let localMP=JSON.parse(localStorage.getItem('i_mp')||'[]');
 function sheetsPost(sheet,data){
   if(!SHEETS_URL)return;
   try{
-    // Create hidden iframe + form to POST to Apps Script (bypasses CORS)
-    var iframe=document.createElement('iframe');
-    iframe.name='gs_iframe_'+Date.now();
-    iframe.style.display='none';
-    document.body.appendChild(iframe);
-    var form=document.createElement('form');
-    form.method='POST';
-    form.action=SHEETS_URL;
-    form.target=iframe.name;
-    form.style.display='none';
-    var input=document.createElement('input');
-    input.type='hidden';
-    input.name='payload';
-    input.value=JSON.stringify({sheet:sheet,data:data});
-    form.appendChild(input);
-    document.body.appendChild(form);
-    form.submit();
-    setTimeout(function(){
-      try{document.body.removeChild(form);document.body.removeChild(iframe);}catch(e){}
-    },5000);
-  }catch(e){console.warn('Sheets post error:',e);}
+    navigator.sendBeacon(SHEETS_URL, new Blob([JSON.stringify({sheet:sheet,data:data})],{type:'text/plain'}));
+  }catch(e){
+    try{
+      fetch(SHEETS_URL,{method:'POST',mode:'no-cors',body:JSON.stringify({sheet:sheet,data:data})});
+    }catch(e2){console.warn('Sheets error:',e2);}
+  }
 }
 async function sheetsGet(sheet){if(!SHEETS_URL)return null;try{const r=await fetch(SHEETS_URL+'?sheet='+sheet);const j=await r.json();return j.data||[];}catch(e){return null;}}
 
