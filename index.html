@@ -415,10 +415,10 @@ async function sheetsPost(sheet,data){
   var url='https://script.google.com/macros/s/AKfycbyWx0SXICvED4DpBjQPvb2auNyUhQSb438vOB__6lZpf1k5uD1zLDJE0fIPDZwascDr/exec';
   var cb="_cb"+Date.now();
   var params="?action=write&sheet="+encodeURIComponent(sheet)+"&data="+encodeURIComponent(JSON.stringify(data))+"&cb="+cb;
-  window[cb]=function(r){delete window[cb];if(s.parentNode)s.parentNode.removeChild(s);};
   var s=document.createElement("script");
-  s.src=url+params;
+  window[cb]=function(r){delete window[cb];if(s.parentNode)s.parentNode.removeChild(s);};
   s.onerror=function(){console.warn("sheetsPost error");delete window[cb];};
+  s.src=url+params;
   document.head.appendChild(s);
 }
 async function sheetsGet(sheet){
