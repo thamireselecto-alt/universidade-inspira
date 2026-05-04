@@ -423,12 +423,12 @@ function sheetsPost(sheet,data){
   var hdr=getSheetHeaders(sheet);
   var obj={};
   data.forEach(function(v,i){if(hdr[i])obj[hdr[i]]=v!=null?String(v):"";});
-  fetch(url+'?sheet='+encodeURIComponent(sheet),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({data:[obj]})}).catch(function(e){console.warn('SheetDB:',e);});
+  fetch(url+'?sheet_title='+encodeURIComponent(sheet),{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify({data:[obj]})}).then(function(r){return r.json();}).then(function(j){console.log('SheetDB ok:',j);}).catch(function(e){console.warn('SheetDB err:',e);});
 }
 async function sheetsGet(sheet){
   var url='https://sheetdb.io/api/v1/7fy5adl2v54lg';
   try{
-    var r=await fetch(url+'?sheet='+encodeURIComponent(sheet));
+    var r=await fetch(url+'?sheet_title='+encodeURIComponent(sheet));
     var j=await r.json();
     if(!Array.isArray(j)||!j.length)return [];
     var keys=Object.keys(j[0]);
