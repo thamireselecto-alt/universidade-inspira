@@ -411,32 +411,30 @@ let S={block:0,ans:{},mpi:0,mpans:{},entry:null,charts:{}};
 let localSurveys=JSON.parse(localStorage.getItem('i_surveys')||'[]');
 let localMP=JSON.parse(localStorage.getItem('i_mp')||'[]');
 
-async function getSheetHeaders(s){
-  var h={
-    'Pesquisa':['Timestamp','BU','Tempo de Atuação','Segmentos','Comp1 - Decisão Estratégica','Comp2 - Gestão por Dados','Comp3 - Liderança Pedagógica','Comp4 - Desenvolvimento Equipe','Comp5 - Comunicação Famílias','Comp6 - Gestão Operacional','Comp7 - Gestão de Crise','Comp8 - Experiência do Cliente','Comp9 - Cultura Inspira','Comp10 - Integração Colaboradores','Comp11 - Uso de IA','Desafios','Consome_Tempo','Insegurança','Temas de Formação','Abertura à IA','Formato','Barreiras','Expectativas'],
-    'MapeamentoPerfil':['Timestamp','Código Anônimo','BU','Perfil','Abertura%','Conscien%','Extroversão%','Amabilidade%','Est_Emocional%','Q1','Q2','Q3','Q4','Q5','Q6','Q7','Q8','Q9','Q10','Q11','Q12','Q13','Q14','Q15','Q16','Q17','Q18','Q19','Q20','Q21','Q22','Q23','Q24','Q25']
-  };
-  return h[s]||[];
-}
-function sheetsPost(sheet,data){
-  var url='https://sheetdb.io/api/v1/7fy5adl2v54lg';
-  var hdr=getSheetHeaders(sheet);
-  var obj={};
-  data.forEach(function(v,i){if(hdr[i])obj[hdr[i]]=v!=null?String(v):"";});
-  fetch(url+'?sheet_title='+encodeURIComponent(sheet),{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify({data:[obj]})}).then(function(r){return r.json();}).then(function(j){console.log('SheetDB ok:',j);}).catch(function(e){console.warn('SheetDB err:',e);});
+async function sheetsPost(sheet,data){
+  var url='https://script.google.com/macros/s/AKfycbyWx0SXICvED4DpBjQPvb2auNyUhQSb438vOB__6lZpf1k5uD1zLDJE0fIPDZwascDr/exec';
+  var cb="_cb"+Date.now();
+  var params="?action=write&sheet="+encodeURIComponent(sheet)+"&data="+encodeURIComponent(JSON.stringify(data))+"&cb="+cb;
+  window[cb]=function(r){delete window[cb];if(s.parentNode)s.parentNode.removeChild(s);};
+  var s=document.createElement("script");
+  s.src=url+params;
+  s.onerror=function(){console.warn("sheetsPost error");delete window[cb];};
+  document.head.appendChild(s);
 }
 async function sheetsGet(sheet){
-  var url='https://sheetdb.io/api/v1/7fy5adl2v54lg';
-  try{
-    var r=await fetch(url+'?sheet_title='+encodeURIComponent(sheet));
-    var j=await r.json();
-    if(!Array.isArray(j)||!j.length)return [];
-    var keys=Object.keys(j[0]);
-    var rows=[keys];
-    j.forEach(function(row){rows.push(keys.map(function(k){return row[k]||"";}));});
-    return rows;
-  }catch(e){return null;}
+  var url='https://script.google.com/macros/s/AKfycbyWx0SXICvED4DpBjQPvb2auNyUhQSb438vOB__6lZpf1k5uD1zLDJE0fIPDZwascDr/exec';
+  return new Promise(function(resolve){
+    var cb="_cb"+Date.now();
+    var params="?sheet="+encodeURIComponent(sheet)+"&cb="+cb;
+    window[cb]=function(d){delete window[cb];if(s.parentNode)s.parentNode.removeChild(s);resolve(d);};
+    var s=document.createElement("script");
+    s.src=url+params;
+    s.onerror=function(){delete window[cb];resolve(null);};
+    setTimeout(function(){if(window[cb]){delete window[cb];resolve(null);}},8000);
+    document.head.appendChild(s);
+  });
 }
+
 function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('screen-'+id).classList.add('active');window.scrollTo(0,0);}
 function selectOpt(m){
   document.getElementById('opt-survey').classList.toggle('selected',m==='survey');
