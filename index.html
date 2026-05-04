@@ -413,26 +413,19 @@ let localMP=JSON.parse(localStorage.getItem('i_mp')||'[]');
 
 async function sheetsPost(sheet,data){
   var url='https://script.google.com/macros/s/AKfycbyWx0SXICvED4DpBjQPvb2auNyUhQSb438vOB__6lZpf1k5uD1zLDJE0fIPDZwascDr/exec';
-  var cb="_cb"+Date.now();
-  var params="?action=write&sheet="+encodeURIComponent(sheet)+"&data="+encodeURIComponent(JSON.stringify(data))+"&cb="+cb;
-  var s=document.createElement("script");
-  window[cb]=function(r){delete window[cb];if(s.parentNode)s.parentNode.removeChild(s);};
-  s.onerror=function(){console.warn("sheetsPost error");delete window[cb];};
-  s.src=url+params;
-  document.head.appendChild(s);
+  var params="?action=write&sheet="+encodeURIComponent(sheet)+"&data="+encodeURIComponent(JSON.stringify(data))+"&cb=_dummy";
+  fetch(url+params,{mode:"no-cors"})
+    .then(function(){console.log("saved",sheet);})
+    .catch(function(e){console.warn("sheetsPost err",e);});
 }
+
 async function sheetsGet(sheet){
   var url='https://script.google.com/macros/s/AKfycbyWx0SXICvED4DpBjQPvb2auNyUhQSb438vOB__6lZpf1k5uD1zLDJE0fIPDZwascDr/exec';
-  return new Promise(function(resolve){
-    var cb="_cb"+Date.now();
-    var params="?sheet="+encodeURIComponent(sheet)+"&cb="+cb;
-    window[cb]=function(d){delete window[cb];if(s.parentNode)s.parentNode.removeChild(s);resolve(d);};
-    var s=document.createElement("script");
-    s.src=url+params;
-    s.onerror=function(){delete window[cb];resolve(null);};
-    setTimeout(function(){if(window[cb]){delete window[cb];resolve(null);}},8000);
-    document.head.appendChild(s);
-  });
+  try{
+    var r=await fetch(url+"?sheet="+encodeURIComponent(sheet));
+    var d=await r.json();
+    return Array.isArray(d)?d:null;
+  }catch(e){return null;}
 }
 
 function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('screen-'+id).classList.add('active');window.scrollTo(0,0);}
