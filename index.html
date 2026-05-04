@@ -411,7 +411,15 @@ let S={block:0,ans:{},mpi:0,mpans:{},entry:null,charts:{}};
 let localSurveys=JSON.parse(localStorage.getItem('i_surveys')||'[]');
 let localMP=JSON.parse(localStorage.getItem('i_mp')||'[]');
 
-async function sheetsPost(sheet,data){if(!SHEETS_URL)return;try{await fetch(SHEETS_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({sheet,data})});}catch(e){}}
+async function sheetsPost(sheet,data){
+  if(!SHEETS_URL)return;
+  try{
+    // Use a form-encoded POST which bypasses CORS preflight on Apps Script
+    var form=new FormData();
+    form.append('payload',JSON.stringify({sheet:sheet,data:data}));
+    fetch(SHEETS_URL,{method:'POST',body:form,mode:'no-cors'});
+  }catch(e){console.warn('Sheets post error:',e);}
+}
 async function sheetsGet(sheet){if(!SHEETS_URL)return null;try{const r=await fetch(SHEETS_URL+'?sheet='+sheet);const j=await r.json();return j.data||[];}catch(e){return null;}}
 
 function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('screen-'+id).classList.add('active');window.scrollTo(0,0);}
