@@ -411,32 +411,32 @@ let S={block:0,ans:{},mpi:0,mpans:{},entry:null,charts:{}};
 let localSurveys=JSON.parse(localStorage.getItem('i_surveys')||'[]');
 let localMP=JSON.parse(localStorage.getItem('i_mp')||'[]');
 
+async function getSheetHeaders(s){
+  var h={
+    'Pesquisa':['Timestamp','BU','Tempo','Segmentos','Comp1','Comp2','Comp3','Comp4','Comp5','Comp6','Comp7','Comp8','Comp9','Comp10','Comp11','Desafios','Consome_Tempo','Inseguranca','Temas','Abertura_IA','Formato','Barreiras','Expectativas'],
+    'MapeamentoPerfil':['Timestamp','Codigo','BU','Perfil','Abertura','Conscienciosidade','Extroversao','Amabilidade','Est_Emocional','Q1','Q2','Q3','Q4','Q5','Q6','Q7','Q8','Q9','Q10','Q11','Q12','Q13','Q14','Q15','Q16','Q17','Q18','Q19','Q20','Q21','Q22','Q23','Q24','Q25']
+  };
+  return h[s]||[];
+}
 function sheetsPost(sheet,data){
-  if(!SHEETS_URL)return;
-  try{
-    var cb='_gs_'+Date.now();
-    var url=SHEETS_URL+'?callback='+cb+'&payload='+encodeURIComponent(JSON.stringify({sheet:sheet,data:data}));
-    var s=document.createElement('script');
-    s.src=url;
-    window[cb]=function(){delete window[cb];if(s.parentNode)s.parentNode.removeChild(s);};
-    s.onerror=function(){delete window[cb];if(s.parentNode)s.parentNode.removeChild(s);};
-    document.head.appendChild(s);
-  }catch(e){console.warn('Sheets error:',e);}
+  var url='https://sheetdb.io/api/v1/7fy5adl2v54lg';
+  var hdr=getSheetHeaders(sheet);
+  var obj={};
+  data.forEach(function(v,i){if(hdr[i])obj[hdr[i]]=v!=null?String(v):"";});
+  fetch(url+'?sheet='+encodeURIComponent(sheet),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({data:[obj]})}).catch(function(e){console.warn('SheetDB:',e);});
 }
 async function sheetsGet(sheet){
-  if(!SHEETS_URL)return null;
-  return new Promise(function(resolve){
-    var cb='_gs_'+Date.now();
-    var url=SHEETS_URL+'?callback='+cb+'&sheet='+encodeURIComponent(sheet);
-    var s=document.createElement('script');
-    s.src=url;
-    window[cb]=function(d){delete window[cb];if(s.parentNode)s.parentNode.removeChild(s);resolve(d.data||[]);};
-    s.onerror=function(){delete window[cb];if(s.parentNode)s.parentNode.removeChild(s);resolve(null);};
-    setTimeout(function(){delete window[cb];resolve(null);},8000);
-    document.head.appendChild(s);
-  });
+  var url='https://sheetdb.io/api/v1/7fy5adl2v54lg';
+  try{
+    var r=await fetch(url+'?sheet='+encodeURIComponent(sheet));
+    var j=await r.json();
+    if(!Array.isArray(j)||!j.length)return [];
+    var keys=Object.keys(j[0]);
+    var rows=[keys];
+    j.forEach(function(row){rows.push(keys.map(function(k){return row[k]||"";}));});
+    return rows;
+  }catch(e){return null;}
 }
-
 function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('screen-'+id).classList.add('active');window.scrollTo(0,0);}
 function selectOpt(m){
   document.getElementById('opt-survey').classList.toggle('selected',m==='survey');
