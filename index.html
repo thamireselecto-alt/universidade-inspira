@@ -424,8 +424,10 @@ async function sheetsGet(sheet){
   try{
     var r=await fetch(url+"?sheet="+encodeURIComponent(sheet));
     var d=await r.json();
-    return Array.isArray(d)?d:null;
-  }catch(e){return null;}
+    // d is array of arrays [[row1col1,row1col2,...],[row2col1,...]]
+    if(!Array.isArray(d)||!d.length)return [];
+    return d;
+  }catch(e){console.warn("sheetsGet err",e);return null;}
 }
 
 function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('screen-'+id).classList.add('active');window.scrollTo(0,0);}
@@ -865,20 +867,17 @@ async function downloadPDFFor(idx){
 // ── DASHBOARDS
 function renderGSBanner(){
   var b=document.getElementById('gs-banner');
-  if(SHEETS_URL){
-    b.innerHTML='<div class="config-banner"><div class="cb-icon">&#x2705;</div><div class="cb-body"><strong>Google Sheets conectado.</strong> Dados sincronizados automaticamente.<br><a href="#" onclick="SHEETS_URL=\'\';localStorage.removeItem(\'inspira_gs_url\');renderGSBanner();return false;" style="color:#be185d;font-size:12px">Desconectar</a></div></div>';
-  }else{
-    b.innerHTML='<div class="config-banner"><div class="cb-icon">&#x2699;</div><div class="cb-body"><strong>Configure o Google Sheets para centralizar dados.</strong><input id="gs-inp" placeholder="https://script.google.com/macros/s/.../exec"><button class="btn-cfg" onclick="saveGS()">Conectar</button></div></div>';
-  }
+  if(b)b.innerHTML='';
 }
+
 function saveGS(){var u=document.getElementById('gs-inp').value.trim();if(!u.startsWith('https://script.google.com')){alert('URL inválida.');return;}SHEETS_URL=u;localStorage.setItem('inspira_gs_url',u);renderDash();}
 
 async function renderDash(){
   document.getElementById('d-sub').textContent='Carregando...';
   var data=null;
-  if(SHEETS_URL){var r=await sheetsGet('Pesquisa');if(r)data=r.slice(1).map(parseSR);}
+  var r=await sheetsGet('Pesquisa');if(r&&r.length>1)data=r.slice(1).map(parseSR);
   if(!data)data=localSurveys;
-  document.getElementById('d-sub').textContent=data.length+' resposta'+(data.length!==1?'s':'')+' · '+(SHEETS_URL?'Google Sheets ✓':'local');
+  document.getElementById('d-sub').textContent=data.length+' resposta'+(data.length!==1?'s':'')+' · Google Sheets ✓';
   renderGSBanner();
   var bus=new Set(data.map(function(d){return d.bu;}));
   document.getElementById('d-kpis').innerHTML=[
@@ -935,7 +934,7 @@ function renderDTable(data){
 
 async function renderMPDash(){
   var data=null;
-  if(SHEETS_URL){var r=await sheetsGet('MapeamentoPerfil');if(r)data=r.slice(1).map(parseMPR);}
+  var r=await sheetsGet('MapeamentoPerfil');if(r&&r.length>1)data=r.slice(1).map(parseMPR);
   if(!data)data=localMP;
   var dims=['O','C','E','A','N'];
   var avgs={};dims.forEach(function(d){var v=data.map(function(x){return x.scores?.[d];}).filter(function(x){return x!=null;});avgs[d]=v.length?Math.round(v.reduce(function(a,b){return a+b;},0)/v.length):0;});
