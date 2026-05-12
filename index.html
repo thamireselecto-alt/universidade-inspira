@@ -885,6 +885,14 @@ async function renderDash(){
   if(!data)data=localSurveys;
   document.getElementById('d-sub').textContent=data.length+' resposta'+(data.length!==1?'s':'')+' · Google Sheets ✓';
   renderGSBanner();
+  // Normalize desafios and temas to always be arrays
+  data=data.map(function(d){
+    function toArr(v){if(!v)return[];if(Array.isArray(v))return v;return String(v).split(', ').filter(function(x){return x;});}
+    d.desafios=toArr(d.desafios);
+    d.temas=toArr(d.temas);
+    d.etapas=toArr(d.etapas);
+    return d;
+  });
   var bus=new Set(data.map(function(d){return d.bu;}));
   document.getElementById('d-kpis').innerHTML=[
     {l:'Total de Respostas',v:data.length,u:'enviadas',c:'c1'},
