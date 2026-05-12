@@ -890,7 +890,19 @@ async function renderDash(){
   document.getElementById('d-filters').innerHTML='<select class="filter-sel" id="f-bu" onchange="applyF()"><option value="">Todas as BUs</option>'+buArr.map(function(b){return '<option>'+b+'</option>';}).join('')+'</select>';
   renderCharts(data);renderDTable(data);
 }
-function parseSR(r){return{ts:r[0],bu:r[1],tempo:r[2],etapas:r[3]?r[3].split(', '):[],comp:{0:+r[4],1:+r[5],2:+r[6],3:+r[7],4:+r[8],5:+r[9],6:+r[10],7:+r[11],8:+r[12],9:+r[13],10:+r[14]},desafios:r[15]?r[15].split(', '):[],tempo_cons:r[16],inseguranca:r[17],temas:r[18]?r[18].split(', '):[],ia_abertura:r[19],formato:r[20],barreiras:r[21],expectativa:r[22]};}
+function parseSR(r){
+  function toArr(v){if(!v)return[];if(Array.isArray(v))return v;return String(v).split(', ').filter(function(x){return x;});}
+  function toNum(v){return isNaN(+v)?0:+v;}
+  return{
+    ts:r[0],bu:r[1],tempo:r[2],
+    etapas:toArr(r[3]),
+    comp:{0:toNum(r[4]),1:toNum(r[5]),2:toNum(r[6]),3:toNum(r[7]),4:toNum(r[8]),5:toNum(r[9]),6:toNum(r[10]),7:toNum(r[11]),8:toNum(r[12]),9:toNum(r[13]),10:toNum(r[14])},
+    desafios:toArr(r[15]),
+    tempo_cons:r[16],inseguranca:r[17],
+    temas:toArr(r[18]),
+    ia_abertura:r[19],formato:r[20],barreiras:r[21],expectativa:r[22]
+  };
+}
 function applyF(){
   var bu=document.getElementById('f-bu')?.value||'';
   var d=localSurveys;if(bu)d=d.filter(function(x){return x.bu===bu;});
@@ -951,7 +963,9 @@ async function renderMPDash(){
   if(!data.length){document.getElementById('mp-charts').innerHTML='<div class="chart-card full"><div class="empty-state"><div class="es-icon">🎯</div><p>Nenhum mapeamento concluído ainda.</p></div></div>';renderMPTable(data);return;}
   renderMPCharts(data);renderMPTable(data);
 }
-function parseMPR(r){return{ts:r[0],nome:r[1],marca:r[2],profile:{title:r[3]},scores:{O:+r[4],C:+r[5],E:+r[6],A:+r[7],N:+r[8]}};}
+function parseMPR(r){
+  return{ts:r[0],nome:r[1],marca:r[2],profile:{title:r[3]},scores:{O:+r[4]||0,C:+r[5]||0,E:+r[6]||0,A:+r[7]||0,N:+r[8]||0}};
+}
 function renderMPCharts(data){
   Object.values(S.charts).forEach(function(c){try{c.destroy();}catch(e){}});S.charts={};
   var dims=['O','C','E','A','N'];
