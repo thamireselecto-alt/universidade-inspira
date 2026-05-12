@@ -421,19 +421,12 @@ async function sheetsPost(sheet,data){
 
 async function sheetsGet(sheet){
   var url='https://script.google.com/macros/s/AKfycbyWx0SXICvED4DpBjQPvb2auNyUhQSb438vOB__6lZpf1k5uD1zLDJE0fIPDZwascDr/exec';
-  return new Promise(function(resolve){
-    var cb="_cb"+Date.now();
-    var s=document.createElement("script");
-    window[cb]=function(d){
-      delete window[cb];
-      if(s.parentNode)s.parentNode.removeChild(s);
-      resolve(Array.isArray(d)?d:null);
-    };
-    s.onerror=function(){delete window[cb];if(s.parentNode)s.parentNode.removeChild(s);resolve(null);};
-    setTimeout(function(){if(window[cb]){delete window[cb];resolve(null);}},8000);
-    s.src=url+"?sheet="+encodeURIComponent(sheet)+"&cb="+cb;
-    document.head.appendChild(s);
-  });
+  try{
+    var r=await fetch(url+"?sheet="+encodeURIComponent(sheet),{mode:"cors"});
+    var d=await r.json();
+    if(!Array.isArray(d)||!d.length)return [];
+    return d;
+  }catch(e){console.warn("sheetsGet err",e);return null;}
 }
 
 function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('screen-'+id).classList.add('active');window.scrollTo(0,0);}
