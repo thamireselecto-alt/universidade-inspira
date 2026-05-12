@@ -919,7 +919,8 @@ function parseSR(r){
 }
 function applyF(){
   var bu=document.getElementById('f-bu')?.value||'';
-  var d=localSurveys;if(bu)d=d.filter(function(x){return x.bu===bu;});
+  var d=lastDashData&&lastDashData.length?lastDashData:localSurveys;
+  if(bu)d=d.filter(function(x){return x.bu===bu;});
   renderCharts(d);renderDTable(d);
 }
 function renderCharts(data){
@@ -987,7 +988,7 @@ function renderCharts(data){
   };
 
   var buTableHTML='<table class="responses-table"><thead><tr><th>BU</th>'+Object.keys(buTableData).map(function(k){return '<th>'+k+'</th>';}).join('')+'</tr></thead><tbody>'+
-    bus.map(function(bu){
+    bus.sort().map(function(bu){
       return '<tr><td><strong>'+bu+'</strong></td>'+Object.values(buTableData).map(function(v){return '<td style="font-size:12px">'+(v[bu]||'—')+'</td>';}).join('')+'</tr>';
     }).join('')+'</tbody></table>';
 
@@ -1099,7 +1100,7 @@ function downloadDashPDF(){
     var y=60;
 
     // KPIs
-    var bus=new Set(data.map(function(d){return d.bu;}).filter(Boolean));
+    var bus=Array.from(new Set(data.map(function(d){return d.bu;}).filter(Boolean))).sort();
     var kpis=[
       {l:'Total de Respostas',v:String(data.length)},
       {l:'BUs Representadas',v:String(bus.size)},
